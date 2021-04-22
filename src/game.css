@@ -1,0 +1,9 @@
+.cardImage {
+    width: 200px;
+}
+
+.card-container {
+    display: grid;
+    grid-template-columns: repeat(2, 200px);
+    gap: 10px;
+}
