@@ -1,16 +1,22 @@
+
 .card {
     position: relative;
+    margin: 5px;
     width: 200px;
     height: 306px;
-    border-radius: 16px;
+    border-radius: 10px;
     transform: perspective(1000px) rotateY(var(--rotationY, 0)) translateY(var(--translationY, 0));
     transform-style: preserve-3d;
-    transition: 0.4s;
+    transition: 0.9s;
     cursor: pointer;
 }
 
 .card.flip {
     --rotationY: 180deg;
+}
+
+.card.hide {
+    visibility: hidden;
 }
 
 .card:hover {
@@ -28,7 +34,15 @@
 }
 
 .card-container {
+    background-color:darkorange;
+    margin: 25px;
+    border-radius: 10px;
     display: grid;
-    grid-template-columns: repeat(2, 200px);
+    grid-template-columns: repeat(3, 200px);
     gap: 10px;
+}
+
+body{
+    background-color: aqua;
+    
 }

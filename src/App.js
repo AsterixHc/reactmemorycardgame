@@ -2,66 +2,122 @@ import React, { useEffect, useState } from "react"
 import Card from "./Card"
 import {ThemeContext, themes} from "./Theme"
 import "./game.css"
+import useCardPicker from "./useCardPicker"
+
 
 function App(props){
     // try API call to get theme, if fail, revert to default
-    const [CardArray, setCardArray] = useState([{source: "./Cars/AS.png", flipped: false, hidden: false}, {source: "./Cars/AS.png", flipped: false, hidden: false}, {source: "./Cars/AH.png", flipped: false, hidden: false}, {source: "./Cars/AD.png", flipped: false, hidden: false}]);
+    const [cardArray, setCardArray] = useState([
+        {id: 0, source: "", flipped: false, hidden: false},
+        {id: 1, source: "", flipped: false, hidden: false},
+        {id: 2, source: "", flipped: false, hidden: false},
+        {id: 3, source: "", flipped: false, hidden: false},
+        {id: 4, source: "", flipped: false, hidden: false},
+        {id: 5, source: "", flipped: false, hidden: false}
+    ]);
     const [chosenCards, setChosenCards] = useState({first: null, second: null});
 
-    useEffect(() => {
-        // vores loop logik
+    const deck = useCardPicker(cardArray.length);
 
-        if (chosenCards.first && chosenCards.second) {
-            //check match
-            if (chosenCards.first.source === chosenCards.second.source) {
+    useEffect(() => {
+        setCardArray(prevState => {
+            let newState = [...prevState];
+            newState.forEach(element => {
+                element.source = deck[element.id];
+            });
+            return newState;
+        });
+    },[]);
+
+    useEffect(() => {
+        let first = chosenCards.first;
+        let second = chosenCards.second;
+
+        if (first && second) {
+            if (first.source === second.source) {
+                // Match.
                 console.log("yay");
-                // hide cards.
+
+                setTimeout(() => {
+                    hideCard(first.id);
+                    hideCard(second.id);
+                    setChosenCards({first: null, second: null});
+                }, 1000)
+
+                // TODO: Give points, shoot confetti, get hookers etc.
             }
             else {
-                
+                // No match.
+                console.log("nay");
+
+                setTimeout(() => {
+                    flipCard(first.id);
+                    flipCard(second.id);
+                    setChosenCards({first: null, second: null});
+                }, 1000)
             }
         }
-
-
-
+        
     }, [chosenCards]);
 
-    function cardCallback(setFlipped, index) {
-        // callback for kort til at flippe sig selv
-        // CardArray[key] -> gør flipped til true på en eller anden måde
-        
-        setFlipped(true);
+    function handleCardClick(id) {
+        if (chosenCards.first && chosenCards.second) return;
+        if (chosenCards.first && chosenCards.first.id === id) return;
+
+        let card = cardArray.find(card => card.id === id);
 
         if (!chosenCards.first) {
-            setChosenCards( prevState => {
+            setChosenCards(prevState => {
                 let newState = {...prevState};
-                newState.first = CardArray[index];
+                newState.first = card;
                 return newState;
             });
         }
-        else if (!chosenCards.second) {
-            setChosenCards( prevState => {
+        else {
+            setChosenCards(prevState => {
                 let newState = {...prevState};
-                newState.second = CardArray[index];
+                newState.second = card;
                 return newState;
             });
         }
+
+        flipCard(id);
     }
 
-    //LOOP ->
-    // No cards chosen
-    // 1 card chosen
-    // 2 cards chosen
-    // Check:
-    //      match -> give points, hide cards
-    //      no match -> detract 1 try, flip cards back
+    function flipCard(id) {
+        setCardArray(prevState => {
+            let newState = [...prevState];
+            let card = newState.find(card => card.id === id);
+            card.flipped = !card.flipped;
+
+            return newState;
+        });
+    }
+
+    function hideCard(id) {
+        setCardArray(prevState => {
+            let newState = [...prevState];
+            let card = newState.find(card => card.id === id);
+            card.hidden = true;
+
+            return newState;
+        });
+    }
 
     return (
         <>
             <ThemeContext.Provider value = {themes.Theme1}>
-                <div className="card-container"> {CardArray.map((element, i) => {
+                <div className="card-container">
+                    {cardArray.map((card, i) => {
                         return(
-                            <Card hidden = {element.hidden} frontImage={element.source.toString()} key={i} index={i} flipped={element.flipped} callback={cardCallback}/>
+                            <Card
+                                frontImage={card.source.toString()}
+                                key={card.id}
+                                id={card.id}
+                                flipped={card.flipped}
+                                hidden={card.hidden}
+                                handleClick={handleCardClick}
+                            />
                         );
                     })}
                 </div>
