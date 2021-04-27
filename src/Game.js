@@ -7,10 +7,13 @@ function Game(props){
     const [cardArray, setCardArray] = useState(useRandomizedDeck(10));
     const [chosenCards, setChosenCards] = useState({first: null, second: null});
     const theme = useContext(ThemeContext);
-
+    //Hardcoded limited movement
+    let moves = 10; 
+    
     useEffect(() => {
         let first = chosenCards.first;
         let second = chosenCards.second;
+        
 
         if (first && second) {
             if (first.source === second.source) {
@@ -22,6 +25,7 @@ function Game(props){
                 }, 1000)
 
                 // TODO: Points, etc.
+
             }
             else {
                 // No match.
@@ -30,8 +34,15 @@ function Game(props){
                     flipCard(second.id);
                     setChosenCards({first: null, second: null});
                 }, 1000)
-
+                
                 // TODO: Detract tries, etc.
+                moves--; //<-- This only comes once, and only removes 1 life, why this is not C# ;( )
+                console.log("Moves left:" + moves);
+                
+                //This doesn't do anything, because ^^ not working
+                if (moves = 0) {
+                    console.log("Out Of moves");
+                }
             }
         }
         
