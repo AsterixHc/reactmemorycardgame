@@ -1,18 +1,14 @@
-import React, {useContext, useEffect, useState} from "react"
-import { ThemeContext } from "./Theme"
+import React, {useContext, useState} from "react"
+import { ThemeContext } from "./ThemeContext"
 
 function Card(props){
-    const lookingTheme = useContext(ThemeContext);
+    const theme = useContext(ThemeContext);
     const [frontImage, setFrontImage] = useState(props.frontImage);
-    const [backImage, setBackImage] = useState(lookingTheme.background);
+    const [backImage, setBackImage] = useState(theme.cardback);
 
     function handleClick() {
         props.handleClick(props.id);
     }
-
-    useEffect(() => {
-        setFrontImage(props.frontImage);
-    },[props.frontImage]);
     
     return(
         <>
