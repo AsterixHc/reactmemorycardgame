@@ -7,9 +7,9 @@ function Sidebar(props) {
     return(
         <>
             <div className="sidebar">
-                <Score score={props.score}/>
+                <Score score= {props.score}/>
                 <Lives lives= {props.lives}/>
-                <Timer timer = {props.timer}/>
+                <Timer timer= {props.timer}/>
             </div>
         </>
     );
