@@ -5,14 +5,22 @@ body, html {
 }
 
 /* --- App component --- */
-.App{
-    height: 100vh;
-    width: 100vw;
+
+/* --- Navigation component --- */
+.navigation ul{
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.navigation li{
+    display: inline;
+    padding: 20px;
 }
 
 /* --- Game component --- */
 .card-container {
-    position:absolute;
+    position: absolute;
     display: grid;
     grid-template-columns: repeat(5, 200px);
     gap: 15px;

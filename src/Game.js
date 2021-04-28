@@ -27,7 +27,7 @@ function Game(props){
                     return newState;
                 });
 
-                props.callbackScore(); // TODO: help
+                props.callbackScore();
             }
             else { // Chosen cards do not match.
                 setDeck(prevState => {
@@ -50,7 +50,7 @@ function Game(props){
 
             setChosenCards({first: null, second: null});
         }, 1000);
-    }, [chosenCards, setDeck]);
+    }, [chosenCards, setDeck, props]);
 
     useEffect(() =>{
         if (playerLives <= 0) {
@@ -58,7 +58,7 @@ function Game(props){
             //TODO: Lose Condition if lives = 0
             props.lostGame(false);
         }
-    },[playerLives]);
+    },[playerLives, props]);
 
     function handleCardClick(id) {
         if (chosenCards.first && chosenCards.second) return;

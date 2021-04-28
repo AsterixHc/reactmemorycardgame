@@ -4,7 +4,7 @@ function StartScreen(props) {
 
     function handleClick()
     {
-        props.changeStartGame(true);
+        props.changeStartGame();
     }
 
     return(
