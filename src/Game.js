@@ -56,6 +56,7 @@ function Game(props){
         if (playerLives <= 0) {
             console.log("Game Over");
             //TODO: Lose Condition if lives = 0
+            props.lostGame(false);
         }
     },[playerLives]);
 

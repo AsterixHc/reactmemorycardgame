@@ -2,9 +2,11 @@ import React, { useState } from "react"
 import {ThemeContext} from "./ThemeContext"
 import "./App.css"
 import Game from "./Game"
+import StartScreen from "./StartScreen"
 
 function App(props){
     const[playerScore, setPlayerScore] = useState(0);
+    const[playingGame, SetPlayingGame] = useState(false);
     let scoreAddedPerMatch = 100;
 
     // TODO: Try API call to get theme, if fail, revert to default
@@ -36,15 +38,26 @@ function App(props){
     }
     
 //TODO: Start Screen
-    return (
-        <>
-            <ThemeContext.Provider value = {theme}>
-                <div className="App" style={{backgroundColor: theme.backgroundMain}}>
-                    <Game score={playerScore} callbackScore = {ScoreChange}/>
-                </div>
-            </ThemeContext.Provider>
-        </>
-    )
+    if(playingGame === false)
+    {
+        return(
+            <>
+                <StartScreen changeStartGame = {SetPlayingGame}/>
+            </>
+        );
+    }
+    else
+    {
+        return (
+            <>
+                <ThemeContext.Provider value = {theme}>
+                    <div className="App" style={{backgroundColor: theme.backgroundMain}}>
+                        <Game score={playerScore} callbackScore = {ScoreChange} lostGame = {SetPlayingGame}/>
+                    </div>
+                </ThemeContext.Provider>
+            </>
+        )
+    }
 }
 
 export default App
