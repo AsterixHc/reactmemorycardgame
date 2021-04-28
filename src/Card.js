@@ -1,10 +1,8 @@
-import React, {useContext, useState} from "react"
+import React, {useContext} from "react"
 import { ThemeContext } from "./ThemeContext"
 
 function Card(props){
     const theme = useContext(ThemeContext);
-    const [frontImage, setFrontImage] = useState(props.frontImage);
-    const [backImage, setBackImage] = useState(theme.cardback);
 
     function handleClick() {
         props.handleClick(props.id);
@@ -14,10 +12,10 @@ function Card(props){
         <>
             <div className={"card" + (props.flipped ? " flip" : "") + (props.hidden ? " hide" : "")} onClick={handleClick}>
                 <div className="card-front">
-                    <img alt="" src={frontImage} style={{width: 200}}></img>
+                    <img alt="" src={theme.cardSource + props.sourceId + ".png"} />
                 </div>
                 <div className="card-back">
-                    <img alt="" src={backImage} style={{width: 200}}></img>
+                    <img alt="" src={theme.cardSource + "B.png"} />
                 </div>
             </div>
         </>

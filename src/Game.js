@@ -1,47 +1,69 @@
 import React, { useContext, useEffect, useState } from "react"
 import Card from "./Card"
+import Sidebar from "./Sidebar"
 import {ThemeContext} from "./ThemeContext"
 import useRandomizedDeck from "./useRandomizedDeck"
 
 function Game(props){
-    const [cardArray, setCardArray] = useState(useRandomizedDeck(10));
-    const [chosenCards, setChosenCards] = useState({first: null, second: null});
     const theme = useContext(ThemeContext);
+    const [chosenCards, setChosenCards] = useState({first: null, second: null});
+    const [playerLives, setPlayerlives] = useState(5);
+    const {deck, setDeck} = useRandomizedDeck(10);
 
     useEffect(() => {
+        if (!chosenCards.first || !chosenCards.second) return;
+
         let first = chosenCards.first;
         let second = chosenCards.second;
 
-        if (first && second) {
-            if (first.source === second.source) {
-                // Match.
-                setTimeout(() => {
-                    hideCard(first.id);
-                    hideCard(second.id);
-                    setChosenCards({first: null, second: null});
-                }, 1000)
+        setTimeout(() => {
+            if (first.sourceId === second.sourceId) { // Chosen cards match.
+                setDeck(prevState => {
+                    let newState = [...prevState];
+                    
+                    newState.find(card => card.id === first.id).hidden = true;
+                    newState.find(card => card.id === second.id).hidden = true;
 
-                // TODO: Points, etc.
-            }
-            else {
-                // No match.
-                setTimeout(() => {
-                    flipCard(first.id);
-                    flipCard(second.id);
-                    setChosenCards({first: null, second: null});
-                }, 1000)
+                    return newState;
+                });
 
-                // TODO: Detract tries, etc.
+                props.callbackScore(); // TODO: help
             }
+            else { // Chosen cards do not match.
+                setDeck(prevState => {
+                    let newState = [...prevState];
+
+                    let card = newState.find(card => card.id === first.id);
+                    card.flipped = !card.flipped;
+
+                    card = newState.find(card => card.id === second.id);
+                    card.flipped = !card.flipped;
+
+                    return newState;
+                });
+
+                setPlayerlives(prevState => {
+                    let newState = prevState - 1;
+                    return newState;
+                });
+            }
+
+            setChosenCards({first: null, second: null});
+        }, 1000);
+    }, [chosenCards, setDeck]);
+
+    useEffect(() =>{
+        if (playerLives <= 0) {
+            console.log("Game Over");
+            //TODO: Lose Condition if lives = 0
         }
-        
-    }, [chosenCards]);
+    },[playerLives]);
 
     function handleCardClick(id) {
         if (chosenCards.first && chosenCards.second) return;
         if (chosenCards.first && chosenCards.first.id === id) return;
 
-        let card = cardArray.find(card => card.id === id);
+        let card = deck.find(card => card.id === id);
 
         if (!chosenCards.first) {
             setChosenCards(prevState => {
@@ -58,38 +80,24 @@ function Game(props){
             });
         }
 
-        flipCard(id);
-    }
-
-    function flipCard(id) {
-        setCardArray(prevState => {
+        setDeck(prevState => {
             let newState = [...prevState];
             let card = newState.find(card => card.id === id);
             card.flipped = !card.flipped;
-
-            return newState;
-        });
-    }
-
-    function hideCard(id) {
-        setCardArray(prevState => {
-            let newState = [...prevState];
-            let card = newState.find(card => card.id === id);
-            card.hidden = true;
-
             return newState;
         });
     }
 
     return (
         <>
+            <Sidebar score={props.score} lives={playerLives}/>
             <div className="card-container" style={{backgroundColor: theme.backgroundSub}}>
-                {cardArray.map((card, i) => {
+                {deck.map((card, i) => {
                     return(
                         <Card
-                            frontImage={card.source.toString()}
                             key={card.id}
                             id={card.id}
+                            sourceId={card.sourceId}
                             flipped={card.flipped}
                             hidden={card.hidden}
                             handleClick={handleCardClick}
