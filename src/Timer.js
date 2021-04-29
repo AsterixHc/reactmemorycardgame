@@ -1,14 +1,14 @@
 import React from 'react'
-import Countdown from 'react-countdown';
 
-function Timer(Props){
+//Logich for timer
+function Timer(props){
+    let minutes = Math.floor(props.timeRemaining / 60).toString().padStart(2, '0'); //Takes secounds and makes it into mins
+    let seconds = Math.floor(props.timeRemaining % 60).toString().padStart(2, '0'); 
+
     return(
-        <div>
             <h1>
-                Timer: <Countdown date = { Date.now() + 5000*60} />
+                Timer: {minutes + " : " + seconds}
             </h1>
-        </div>
-        //PROBLEM!! Chosen card resets timer, should add some previouse state
     );
 }
 

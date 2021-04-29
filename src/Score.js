@@ -1,10 +1,32 @@
-import React from "react"
+import React, { useContext } from "react"
+import { ThemeContext } from "./ThemeContext";
 
-function Score(Props) {
+function Score(props) {
+    const theme = useContext(ThemeContext);
+
+    let gameOverMessage;
+
+    if (props.lives === 0) {
+        gameOverMessage = "Game over: Ran out of lives!";
+    }
+    else if (props.timeRemaining <= 0) {
+        gameOverMessage = "Game over: Ran out of time!";
+    }
+    else {
+        gameOverMessage = "All cards cleared!";
+    }
+
+
+
     return(
         <>
-            <div>
-                <h1>Score: {Props.score}</h1>
+            <div className="score-component" style={{backgroundColor: theme.backgroundSub}}>
+                <h1>{gameOverMessage}</h1>
+                <h2>Time remaining: {props.timeRemaining}</h2>
+                <h2>Lives remaining: {props.lives}</h2>
+                <h2>Match score: {props.score}</h2>
+                <hr></hr>
+                <h2>Final score: {(props.lives + props.timeRemaining) * props.score}</h2>
             </div>
         </>
     );

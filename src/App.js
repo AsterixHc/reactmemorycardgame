@@ -6,13 +6,9 @@ import StartScreen from "./StartScreen"
 import Navigation from "./Navigation"
 
 function App(props){
-    const[playerScore, setPlayerScore] = useState(0);
-    const[playingGame, SetPlayingGame] = useState(false);
-    let scoreAddedPerMatch = 100;
-
     // TODO: Try API call to get theme, if fail, revert to default
     const themes = {
-        Theme1: { // Aqua + DarkOrange
+        default: {
             name: "default",
             backgroundMain: "#00ffff",
             backgroundSub: "#ff8c00",
@@ -20,7 +16,7 @@ function App(props){
             text: "#ffffff",
             cardSource: "./cards/default/"
         },
-        Theme2: { // Miami Vice
+        vice: {
             name: "vice",
             backgroundMain: "#0bd3d3",
             backgroundSub: "#f890e7",
@@ -29,8 +25,11 @@ function App(props){
             cardSource: "./cards/vice/"
         }
     };
-
-    const [activeTheme, setActiveTheme] = useState(themes.Theme1);
+    
+    const [activeTheme, setActiveTheme] = useState(themes.default);
+    const [playerScore, setPlayerScore] = useState(0);
+    const [playingGame, SetPlayingGame] = useState(false);
+    let scoreAddedPerMatch = 100;
 
     useEffect(() => {
         document.body.style.backgroundColor = activeTheme.backgroundMain;
@@ -49,36 +48,42 @@ function App(props){
         });
     },[]);
 
-    function toggleTheme(){
-        setActiveTheme(prevState => {
-            let newState = prevState.name === "default" ? themes.Theme2 : themes.Theme1;
-            return newState;
+    const selectThemeCallback = useCallback(themeName => {
+        if (activeTheme.name === themeName) return;
+
+        setActiveTheme(() => {
+            let newTheme;
+
+            switch (themeName) {
+                case "default":
+                    newTheme = themes.default;
+                    break;
+                case "vice":
+                    newTheme = themes.vice;
+                    break;
+                // TODO: More cases when additional themes are added...
+                default:
+                    newTheme = themes.default;
+                    break;
+            }
+            return newTheme;
         });
-    }
-    
-    if(playingGame === false)
-    {
-        return(
-            <>
-                <ThemeContext.Provider value = {activeTheme}>
-                    <StartScreen changeStartGame = {togglePlayingCallback}/>
-                </ThemeContext.Provider>
-            </>
-        );
-    }
-    else
-    {
-        return (
-            <>
-                <ThemeContext.Provider value = {activeTheme}>
-                    <div className="App">
-                        <Navigation toggleThemeCallback={toggleTheme}/>
-                        <Game score={playerScore} callbackScore = {scoreCallback} lostGame = {togglePlayingCallback}/>
-                    </div>
-                </ThemeContext.Provider>
-            </>
-        )
-    }
+        // eslint-disable-next-line
+    },[activeTheme]);
+
+    return (
+        <>
+            <ThemeContext.Provider value = {activeTheme}>
+                <div className="App">
+                    <Navigation selectThemeCallback={selectThemeCallback}/>
+                    {playingGame
+                        ? <Game score={playerScore} callbackScore = {scoreCallback} lostGame = {togglePlayingCallback}/>
+                        : <StartScreen changeStartGame = {togglePlayingCallback}/>
+                    }
+                </div>
+            </ThemeContext.Provider>
+        </>
+    )
 }
 
 export default App

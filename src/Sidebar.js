@@ -1,16 +1,17 @@
-import React from 'react';
-import Score from './Score';
-import Lives from './Lives';
+import React, { useContext } from 'react';
 import Timer from './Timer';
-
+import { ThemeContext } from './ThemeContext';
+//Hold everything that shows in games sidebar
 function Sidebar(props) {
+    const theme = useContext(ThemeContext);
+
     return(
         <>
-            <div className="sidebar">
-                <Score score= {props.score}/>
-                <Lives lives= {props.lives}/>
-                <Timer timer= {props.timer}/>
-            </div>
+            <nav className="sidebar" style={{backgroundColor: theme.window}}>
+                <span><h1>Score: {props.score}</h1></span>
+                <span><h1>Lives: {props.lives}</h1></span>
+                <span><Timer timeRemaining = {props.timeRemaining}/></span>
+            </nav>
         </>
     );
 }

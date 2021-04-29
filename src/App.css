@@ -18,6 +18,18 @@ body, html {
     padding: 20px;
 }
 
+/* --- Sidebar component --- */
+.sidebar:not(span){
+    padding-left: 20px;
+    display: block;
+    position: fixed;
+    height: 250px;
+    width: 250px;
+    top: 40px;
+    right: 100px;
+    border-radius: 13px;
+}
+
 /* --- Game component --- */
 .card-container {
     position: absolute;
