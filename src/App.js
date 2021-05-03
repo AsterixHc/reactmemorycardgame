@@ -1,88 +1,89 @@
-import React, { useState, useEffect, useCallback } from "react"
-import {ThemeContext} from "./ThemeContext"
+import React, { useState, useEffect, useCallback, useMemo } from "react"
+import { ThemeContext } from "./ThemeContext"
 import "./App.css"
 import Game from "./Game"
 import StartScreen from "./StartScreen"
 import Navigation from "./Navigation"
 
-function App(props){
+function App(props) {
     // TODO: Try API call to get theme, if fail, revert to default
-    const themes = {
-        default: {
-            name: "default",
-            backgroundMain: "#00ffff",
-            backgroundSub: "#ff8c00",
-            window: "#ff8c00",
-            text: "#ffffff",
-            cardSource: "./cards/default/"
-        },
-        vice: {
-            name: "vice",
-            backgroundMain: "#0bd3d3",
-            backgroundSub: "#f890e7",
-            window: "#d0d0d0",
-            text: "#ffffff",
-            cardSource: "./cards/vice/"
-        }
-    };
-    
+    const themes = useMemo(() => {
+        return (
+            {
+                default: {
+                    name: "default",
+                    backgroundMain: "#00ffff",
+                    backgroundSub: "#ff8c00",
+                    window: "#ff8c00",
+                    text: "#000000",
+                    textShadow: "none",
+                    cardSource: "./cards/default/"
+                },
+                vice: {
+                    name: "vice",
+                    backgroundMain: "#0bd3d3",
+                    backgroundSub: "#f890e7",
+                    window: "#d0d0d0",
+                    text: "#ffffff",
+                    textShadow: "0px 0px 4px rgba(0, 0, 0, 0.8)",
+                    cardSource: "./cards/vice/"
+                }
+            }
+        );
+    }, []);
+
     const [activeTheme, setActiveTheme] = useState(themes.default);
-    const [playerScore, setPlayerScore] = useState(0);
-    const [playingGame, SetPlayingGame] = useState(false);
-    let scoreAddedPerMatch = 100;
+    const [playingGame, setPlayingGame] = useState(false);
+    const [numberCards, setNumberCards] = useState(2);
 
     useEffect(() => {
         document.body.style.backgroundColor = activeTheme.backgroundMain;
-    },[activeTheme]);
+    }, [activeTheme]);
 
-    const scoreCallback = useCallback(() => {
-        setPlayerScore(prevState => {
-            let newState = prevState + scoreAddedPerMatch;
-            return newState;
-        });
-    }, [scoreAddedPerMatch]);
+    const setPlayingCallback = useCallback(playing => {
+        setPlayingGame(playing);
+    }, []);
 
-    const togglePlayingCallback = useCallback(() => {
-        SetPlayingGame( prevState => {
-            return !prevState;
-        });
-    },[]);
+    const setNumberCardsCallback = useCallback(numberCards => {
+        setNumberCards(numberCards);
+    }, []);
 
     const selectThemeCallback = useCallback(themeName => {
-        if (activeTheme.name === themeName) return;
+        setActiveTheme(prevState => {
+            if (prevState.name === themeName) return;
 
-        setActiveTheme(() => {
-            let newTheme;
+            let newState;
 
             switch (themeName) {
                 case "default":
-                    newTheme = themes.default;
+                    newState = themes.default;
                     break;
+
                 case "vice":
-                    newTheme = themes.vice;
+                    newState = themes.vice;
                     break;
-                // TODO: More cases when additional themes are added...
+
+                // TODO: More here.
+
                 default:
-                    newTheme = themes.default;
+                    newState = themes.default;
                     break;
             }
-            return newTheme;
+
+            return newState;
         });
-        // eslint-disable-next-line
-    },[activeTheme]);
+    }, [themes]);
 
     return (
-        <>
-            <ThemeContext.Provider value = {activeTheme}>
-                <div className="App">
-                    <Navigation selectThemeCallback={selectThemeCallback}/>
-                    {playingGame
-                        ? <Game score={playerScore} callbackScore = {scoreCallback} lostGame = {togglePlayingCallback}/>
-                        : <StartScreen changeStartGame = {togglePlayingCallback}/>
-                    }
-                </div>
+        <div className="App" style={{ color: activeTheme.text, textShadow: activeTheme.textShadow }}>
+            <ThemeContext.Provider value={activeTheme}>
+                <Navigation selectThemeCallback={selectThemeCallback} setPlayingGame={setPlayingCallback} />
+                {playingGame
+                    ? <Game numberCards={numberCards}/>
+                    : <StartScreen setPlayingGame={setPlayingCallback} setNumberCardsCallback={setNumberCardsCallback} />
+                }
             </ThemeContext.Provider>
-        </>
+        </div>
     )
 }
 

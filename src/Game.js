@@ -1,63 +1,94 @@
-import React, { useContext, useEffect, useState } from "react"
-import Card from "./Card"
-import Sidebar from "./Sidebar"
-import {ThemeContext} from "./ThemeContext"
+import React, { useEffect, useState, useCallback } from "react"
 import useRandomizedDeck from "./useRandomizedDeck"
+import useCountdown from "./useCountdown"
+import Sidebar from "./Sidebar"
 import Score from './Score';
+import CardContainer from "./CardContainer"
 
-function Game(props){
-    //Says what theme we are using
-    const theme = useContext(ThemeContext);
+function Game(props) {
+    // A deck of card pairs to be used in the game.
+    const { deck, setDeck } = useRandomizedDeck(props.numberCards);
 
-    //Defines whitch card is chosen
-    const [chosenCards, setChosenCards] = useState({first: null, second: null});
-    
-    //Player health score
-    const [playerLives, setPlayerlives] = useState(5); //5 HP too little for player to end game
-    
-    //Number of cards
-    const {deck, setDeck} = useRandomizedDeck(10);
-    
-    //Time for timer in Secounds
-    const [timeRemaining, setTimeRemaining] = useState(30); //30s can be playable
+    // The cards that player has chosen to flip.
+    const [chosenCards, setChosenCards] = useState({ first: null, second: null });
 
-    const [timerInterval, setTimerInterval] = useState(null);
+    // The number of remaining lives, used to determine lose condition and final score.
+    const [playerLives, setPlayerlives] = useState(5);
 
-    //The player's score
+    // Callback to handle timer reaching zero.
+    const handleTimerZero = useCallback(() => {
+        setShowScore(true);
+    }, []);
+
+    // The amount of remaining time, used to determine lose condition and final score.
+    const { timer, running: timerRunning, start: startTImer, stop: stopTimer } = useCountdown(30, false, handleTimerZero);
+
+    // The player's current score from matchnig cards.
     const [score, setScore] = useState(0);
 
     //Determines whether the score component is shown
-    const [showScoreScreen, setShowScoreScreen] = useState(false);
+    const [showScore, setShowScore] = useState(false); // TODO: make this better and not ugly
 
-    //Card game logic
+    // At start of game, flip all cards for 2 seconds.
+    useEffect(() => {
+
+        let timeout = setTimeout(() => {
+            setDeck(prevState => {
+                let newState = [...prevState];
+                newState.forEach(card => {
+                    card.flipped = true;
+                });
+                return newState;
+            });
+        }, 500);
+
+        timeout = setTimeout(() => {
+            setDeck(prevState => {
+                let newState = [...prevState];
+                newState.forEach(card => {
+                    card.flipped = false;
+                });
+
+                startTImer();
+                return newState;
+            });
+        }, 2000);
+
+        return () => {clearTimeout(timeout)};
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    },[]);
+
+    // Card game logic.
     useEffect(() => {
         if (!chosenCards.first || !chosenCards.second) return;
 
         let first = chosenCards.first;
         let second = chosenCards.second;
 
-        setTimeout(() => {
+        let effectTimeout = setTimeout(() => {
             if (first.sourceId === second.sourceId) { //Chosen cards match.
                 setDeck(prevState => {
                     let newState = [...prevState];
-                    
+
                     newState.find(card => card.id === first.id).hidden = true;
                     newState.find(card => card.id === second.id).hidden = true;
 
                     return newState;
                 });
 
+                // Add points for matching.
                 setScore(prevState => {
                     return prevState + 100;
                 });
 
-                // If win condition met:
+                // Check win condition.
                 if (deck.every(card => card.hidden === true)) {
-                    clearInterval(timerInterval);
-                    setShowScoreScreen(true);
+                    stopTimer();
+                    setShowScore(true);
                 }
             }
-            else { //Chosen cards do not match.
+            else { // Chosen cards do not match.
                 setDeck(prevState => {
                     let newState = [...prevState];
 
@@ -69,40 +100,28 @@ function Game(props){
 
                     return newState;
                 });
-                //Removes players 1 live when cards doesn't match
+
+                // Detract 1 life. Check lose condition.
                 setPlayerlives(prevState => {
-                    let newState = prevState - 1;
-                    return newState;
+                    if (prevState === 1) {
+                        stopTimer();
+                        setShowScore(true);
+                    }
+                    return prevState - 1;;
                 });
             }
 
-            setChosenCards({first: null, second: null}); //Sets cards back to null aka not selected
-        }, 1000);
-        // eslint-disable-next-line
-    }, [chosenCards, setDeck]);
-
-    //Loose game condition
-    useEffect(() =>{
-        if (playerLives <= 0 || timeRemaining <= 0) {
-            clearInterval(timerInterval);
-            setShowScoreScreen(true);
-        }
-        // eslint-disable-next-line
-    },[playerLives, timeRemaining, props]);
-
-    //Timer for the game
-    useEffect(() => {
-        let timerId = setInterval(() => {
-            setTimeRemaining(prevState => {
-                return prevState - 1;
-            });
+            // Reset selected cards in preparation for next round.
+            setChosenCards({ first: null, second: null });
         }, 1000);
 
-        setTimerInterval(timerId);
-    },[]);
+        return () => clearTimeout(effectTimeout);
 
-    //Card comparisson logic
-    function handleCardClick(id) {
+    }, [chosenCards, deck, setDeck, stopTimer]);
+
+    // Callback to handle card click.
+    const handleCardClick = useCallback(id => {
+        if (!timerRunning) return;
         if (chosenCards.first && chosenCards.second) return;
         if (chosenCards.first && chosenCards.first.id === id) return;
 
@@ -110,14 +129,14 @@ function Game(props){
 
         if (!chosenCards.first) {
             setChosenCards(prevState => {
-                let newState = {...prevState};
+                let newState = { ...prevState };
                 newState.first = card;
                 return newState;
             });
         }
         else {
             setChosenCards(prevState => {
-                let newState = {...prevState};
+                let newState = { ...prevState };
                 newState.second = card;
                 return newState;
             });
@@ -125,38 +144,21 @@ function Game(props){
 
         setDeck(prevState => {
             let newState = [...prevState];
-            let card = newState.find(card => card.id === id);
             card.flipped = !card.flipped;
             return newState;
         });
-    }
+    }, [chosenCards, deck, setDeck, timerRunning])
 
-    if (showScoreScreen) {
-        return(
-            <>
-                <Score score={score} timeRemaining={timeRemaining} lives={playerLives}/>
-            </>
+    if (showScore) {
+        return (
+            <Score score={score} timeRemaining={timer} lives={playerLives} />
         );
     }
     else {
         return (
             <>
-                <Sidebar score={score} lives={playerLives} timeRemaining={timeRemaining}/>
-    
-                <div className="card-container" style={{backgroundColor: theme.backgroundSub}}>
-                    {deck.map((card, i) => {
-                        return(
-                            <Card
-                                key={card.id}
-                                id={card.id}
-                                sourceId={card.sourceId}
-                                flipped={card.flipped}
-                                hidden={card.hidden}
-                                handleClick={handleCardClick}
-                            />
-                        );
-                    })}
-                </div>           
+                <Sidebar score={score} lives={playerLives} timeRemaining={timer} />
+                <CardContainer deck={deck} handleCardClick={handleCardClick} />
             </>
         )
     }

@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useCallback } from 'react';
 import { ThemeContext } from './ThemeContext';
 
 //Top navigation part
@@ -7,29 +7,28 @@ function Navigation(props) {
     const [themeSelect, setThemeSelect] = useState("default");
 
     //Handles the theme selection
-    function handleThemeSelectChange(event) {
+    const handleThemeSelectChange = useCallback(event => {
         setThemeSelect(event.target.value);
-        console.log("setting theme with value: " + event.target.value);
         props.selectThemeCallback(event.target.value);
-    }
+    }, [props]);
 
-    //Normal stuff for navigational bar, remember to insert something in Item 1 if needed
-    return(
+    return (
         <>
-            <nav className="navigation" style={{backgroundColor: theme.window}}> 
-                <ul>
-                    <li><span>Item 1</span></li>
-                    <li><span>Item 2</span></li>
-                    <li><span>Item 3</span></li>
-                    <li>
-                        <label>Select a theme:</label>
-                        <select id="theme-select-input" value={themeSelect} onChange={handleThemeSelectChange}>
-                            <option value="default">Default</option>
-                            <option value="vice">Miami Vice</option>
-                        </select>
-                    </li>
-                </ul>
-            </nav>
+            <ul className="navigation" style={{ backgroundColor: theme.window }}>
+                <li>
+                    <span onClick={() => { props.setPlayingGame(false) }}>Home</span>
+                </li>
+                {/* <li><span>Another item</span></li> */}
+                {/* <li><span>Another item</span></li> */}
+                <li id="theme-select-input">
+                    <label>Select a theme: </label>
+                    <select value={themeSelect} onChange={handleThemeSelectChange}>
+                        <option value="default">Default</option>
+                        <option value="vice">Miami Vice</option>
+                    </select>
+                </li>
+            </ul>
+            <div id="navigation-spacer">&nbsp;</div>
         </>
     );
 }

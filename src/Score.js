@@ -16,19 +16,15 @@ function Score(props) {
         gameOverMessage = "All cards cleared!";
     }
 
-
-
-    return(
-        <>
-            <div className="score-component" style={{backgroundColor: theme.backgroundSub}}>
-                <h1>{gameOverMessage}</h1>
-                <h2>Time remaining: {props.timeRemaining}</h2>
-                <h2>Lives remaining: {props.lives}</h2>
-                <h2>Match score: {props.score}</h2>
-                <hr></hr>
-                <h2>Final score: {(props.lives + props.timeRemaining) * props.score}</h2>
-            </div>
-        </>
+    return (
+        <div className="score-component" style={{ backgroundColor: theme.backgroundSub }}>
+            <h1>{gameOverMessage}</h1>
+            <h2>Time remaining: {props.timeRemaining} seconds</h2>
+            <h2>Lives remaining: {props.lives}</h2>
+            <h2>Points for matching cards: {props.score}</h2>
+            <hr></hr>
+            <h2>Final score: {(props.lives + props.timeRemaining) * props.score}</h2>
+        </div>
     );
 }
 

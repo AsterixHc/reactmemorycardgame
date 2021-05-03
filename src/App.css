@@ -6,16 +6,46 @@ body, html {
 
 /* --- App component --- */
 
+/* --- StartScreen component --- */
+#start-screen{
+    display: grid;
+    place-items: center;
+    padding: 35vh;
+}
+
 /* --- Navigation component --- */
-.navigation ul{
+.navigation{position: fixed;
+    width: 100%;
     list-style-type: none;
     margin: 0;
     padding: 0;
 }
 
-.navigation li{
-    display: inline;
-    padding: 20px;
+.navigation li:not(#theme-select-input){
+    float: left;
+    border-right: 1px solid rgba(0, 0, 0, 0.1);;
+}
+
+.navigation li:not(#theme-select-input):hover{
+    cursor: pointer;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.navigation span{
+    display: block;
+    width: 60px;
+    padding: 10px;
+    text-align: center;
+}
+
+#theme-select-input{
+    float:right;
+    padding: 9px;
+    padding-right: 30px;
+}
+
+#navigation-spacer{
+    height: 39px;
 }
 
 /* --- Sidebar component --- */
