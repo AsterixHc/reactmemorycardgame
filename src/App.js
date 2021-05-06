@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from "react"
 import { ThemeContext } from "./ThemeContext"
 import "./App.css"
 import Game from "./Game"
+import Score from './Score'
 import StartScreen from "./StartScreen"
 import Navigation from "./Navigation"
 
@@ -33,16 +34,13 @@ function App(props) {
     }, []);
 
     const [activeTheme, setActiveTheme] = useState(themes.default);
-    const [playingGame, setPlayingGame] = useState(false);
+    const [activeScreen, setActiveScreen] = useState("start");
     const [numberCards, setNumberCards] = useState(2);
+    const [endGameStats, setEndGameStats] = useState({score: 0, lives: 0, timeRemaining: 0});
 
     useEffect(() => {
         document.body.style.backgroundColor = activeTheme.backgroundMain;
     }, [activeTheme]);
-
-    const setPlayingCallback = useCallback(playing => {
-        setPlayingGame(playing);
-    }, []);
 
     const setNumberCardsCallback = useCallback(numberCards => {
         setNumberCards(numberCards);
@@ -75,13 +73,13 @@ function App(props) {
     }, [themes]);
 
     return (
-        <div className="App" style={{ color: activeTheme.text, textShadow: activeTheme.textShadow }}>
+        <div id="App" style={{ color: activeTheme.text, textShadow: activeTheme.textShadow }}>
             <ThemeContext.Provider value={activeTheme}>
-                <Navigation selectThemeCallback={selectThemeCallback} setPlayingGame={setPlayingCallback} />
-                {playingGame
-                    ? <Game numberCards={numberCards}/>
-                    : <StartScreen setPlayingGame={setPlayingCallback} setNumberCardsCallback={setNumberCardsCallback} />
-                }
+                <Navigation selectThemeCallback={selectThemeCallback} setActiveScreen={setActiveScreen} />
+                {activeScreen === "start" && <StartScreen setActiveScreen={setActiveScreen} setNumberCardsCallback={setNumberCardsCallback} />}
+                {activeScreen === "single" && <Game setActiveScreen={setActiveScreen} numberCards={numberCards} setEndGameStats={setEndGameStats}/>}
+                {activeScreen === "multi" && <Game setActiveScreen={setActiveScreen} numberCards={numberCards}/>}
+                {activeScreen === "score" && <Score score={endGameStats.score} lives={endGameStats.lives} timeRemaining={endGameStats.timeRemaining}/>}
             </ThemeContext.Provider>
         </div>
     )

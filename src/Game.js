@@ -2,7 +2,6 @@ import React, { useEffect, useState, useCallback } from "react"
 import useRandomizedDeck from "./useRandomizedDeck"
 import useCountdown from "./useCountdown"
 import Sidebar from "./Sidebar"
-import Score from './Score';
 import CardContainer from "./CardContainer"
 
 function Game(props) {
@@ -16,18 +15,21 @@ function Game(props) {
     const [playerLives, setPlayerlives] = useState(5);
 
     // Callback to handle timer reaching zero.
-    const handleTimerZero = useCallback(() => {
-        setShowScore(true);
-    }, []);
+    // const handleTimerZero = useCallback(() => {
+    //     props.setEndGameStats({ score: score, lives: playerLives, timeRemaining: timer });
+    //     props.setActiveScreen("score");
+    // }, []);
+
+    function handleTimerZero() {
+        props.setEndGameStats({ score: score, lives: playerLives, timeRemaining: timer });
+        props.setActiveScreen("score");
+    }
 
     // The amount of remaining time, used to determine lose condition and final score.
     const { timer, running: timerRunning, start: startTImer, stop: stopTimer } = useCountdown(30, false, handleTimerZero);
 
     // The player's current score from matchnig cards.
     const [score, setScore] = useState(0);
-
-    //Determines whether the score component is shown
-    const [showScore, setShowScore] = useState(false); // TODO: make this better and not ugly
 
     // At start of game, flip all cards for 2 seconds.
     useEffect(() => {
@@ -54,10 +56,10 @@ function Game(props) {
             });
         }, 2000);
 
-        return () => {clearTimeout(timeout)};
+        return () => { clearTimeout(timeout) };
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    },[]);
+    }, []);
 
     // Card game logic.
     useEffect(() => {
@@ -85,7 +87,12 @@ function Game(props) {
                 // Check win condition.
                 if (deck.every(card => card.hidden === true)) {
                     stopTimer();
-                    setShowScore(true);
+                    // setShowScore(true);
+
+                    // send end game stats to app (score, lives, timerRemaining)
+                    // setactivescreen "score"
+                    props.setEndGameStats({ score: score, lives: playerLives, timeRemaining: timer });
+                    props.setActiveScreen("score");
                 }
             }
             else { // Chosen cards do not match.
@@ -105,7 +112,9 @@ function Game(props) {
                 setPlayerlives(prevState => {
                     if (prevState === 1) {
                         stopTimer();
-                        setShowScore(true);
+
+                        props.setEndGameStats({ score: score, lives: playerLives, timeRemaining: timer });
+                        props.setActiveScreen("score");
                     }
                     return prevState - 1;;
                 });
@@ -117,7 +126,8 @@ function Game(props) {
 
         return () => clearTimeout(effectTimeout);
 
-    }, [chosenCards, deck, setDeck, stopTimer]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [chosenCards]);
 
     // Callback to handle card click.
     const handleCardClick = useCallback(id => {
@@ -149,19 +159,12 @@ function Game(props) {
         });
     }, [chosenCards, deck, setDeck, timerRunning])
 
-    if (showScore) {
-        return (
-            <Score score={score} timeRemaining={timer} lives={playerLives} />
-        );
-    }
-    else {
-        return (
-            <>
-                <Sidebar score={score} lives={playerLives} timeRemaining={timer} />
-                <CardContainer deck={deck} handleCardClick={handleCardClick} />
-            </>
-        )
-    }
+    return (
+        <div id="game">
+            <CardContainer deck={deck} handleCardClick={handleCardClick} />
+            <Sidebar score={score} lives={playerLives} timeRemaining={timer} />
+        </div>
+    )
 }
 
 export default Game;

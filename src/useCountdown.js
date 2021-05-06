@@ -23,7 +23,9 @@ function useCountdown(seconds, runOnMount, onTimerZero) {
         }
 
         return () => clearInterval(interval);
-    }, [running, onTimerZero]);
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [running]);
 
     // Starts the countdown, only if not already running.
     const start = useCallback(() => {

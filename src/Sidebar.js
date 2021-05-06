@@ -7,11 +7,17 @@ function Sidebar(props) {
     const theme = useContext(ThemeContext);
 
     return (
-        <nav className="sidebar" style={{ backgroundColor: theme.window }}>
-            <span><h1>Points: {props.score}</h1></span>
-            <span><h1>Lives: {props.lives}</h1></span>
-            <span><Timer timeRemaining={props.timeRemaining} /></span>
-        </nav>
+        <div id="sidebar" style={{ backgroundColor: theme.window }}>
+            <h2>Points: {props.score}</h2>
+            <h2>Lives: {props.lives}</h2>
+            <h2><Timer timeRemaining={props.timeRemaining} /></h2>
+        </div>
+
+        // <nav className="sidebar" style={{ backgroundColor: theme.window }}>
+        //     <span><h1>Points: {props.score}</h1></span>
+        //     <span><h1>Lives: {props.lives}</h1></span>
+        //     <span><Timer timeRemaining={props.timeRemaining} /></span>
+        // </nav>
     );
 }
 

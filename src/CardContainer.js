@@ -6,7 +6,7 @@ function CardContainer(props) {
     const theme = useContext(ThemeContext);
 
     return (
-        <div className="card-container" style={{ backgroundColor: theme.backgroundSub }}>
+        <div id="card-container" style={{ backgroundColor: theme.backgroundSub }}>
             {props.deck.map((card) => {
                 return (
                     <Card

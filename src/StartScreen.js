@@ -1,26 +1,29 @@
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
+import { ThemeContext } from "./ThemeContext";
 
 function StartScreen(props) {
-    const [selectInput, setSelectInput] = useState(2);
+    const theme = useContext(ThemeContext);
+    const [selectInput, setSelectInput] = useState(10);
 
     function handleChangeSelect(event) {
         setSelectInput(event.target.value);
     }
 
     function handleClickStart() {
-        props.setPlayingGame(true)
+        props.setActiveScreen("single");
         props.setNumberCardsCallback(selectInput);
     }
 
-    return(
-        <>
-            <div id="start-screen">
-                <button onClick={handleClickStart} >
-                    Start Game!
+    return (
+
+        <div id="start-screen" style={{ backgroundColor: theme.backgroundSub }}>
+            <button onClick={handleClickStart} >
+                Start Game!
                 </button>
-                <br />
+            <div id="number-cards-select">
                 <label>Select number of cards: </label>
-                <select id="select-number-cards" value={selectInput} onChange={handleChangeSelect}>
+                <br />
+                <select value={selectInput} onChange={handleChangeSelect}>
                     <option>2</option>
                     <option>4</option>
                     <option>6</option>
@@ -33,12 +36,12 @@ function StartScreen(props) {
                     <option>20</option>
                     <option>104</option>
                 </select>
-                <br />
-                <button>
-                    MultiPlayer!
-                </button>
             </div>
-        </>
+            <button>
+                MultiPlayer!
+                </button>
+        </div>
+
     );
 }
 

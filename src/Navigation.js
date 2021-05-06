@@ -14,21 +14,23 @@ function Navigation(props) {
 
     return (
         <>
-            <ul className="navigation" style={{ backgroundColor: theme.window }}>
-                <li>
-                    <span onClick={() => { props.setPlayingGame(false) }}>Home</span>
+            <nav id="nav" style={{ backgroundColor: theme.window }}>
+                <ul>
+                    <li onClick={() => { props.setActiveScreen("start") }}>
+                        Home
                 </li>
-                {/* <li><span>Another item</span></li> */}
-                {/* <li><span>Another item</span></li> */}
-                <li id="theme-select-input">
-                    <label>Select a theme: </label>
-                    <select value={themeSelect} onChange={handleThemeSelectChange}>
-                        <option value="default">Default</option>
-                        <option value="vice">Miami Vice</option>
-                    </select>
-                </li>
-            </ul>
-            <div id="navigation-spacer">&nbsp;</div>
+                    {/* <li>Item 2</li>
+                    <li>Item 3</li> */}
+                    <li id="theme-select">
+                        <label>Select a theme: </label>
+                        <select value={themeSelect} onChange={handleThemeSelectChange}>
+                            <option value="default">Default</option>
+                            <option value="vice">Miami Vice</option>
+                        </select>
+                    </li>
+                </ul>
+            </nav>
+            {/* <div id="navigation-spacer">&nbsp;</div> */}
         </>
     );
 }
