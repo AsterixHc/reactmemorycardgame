@@ -1,7 +1,7 @@
 import React, { useContext } from "react"
 import { ThemeContext } from "./ThemeContext";
 
-function Score(props) {
+function ScoreScreen(props) {
     const theme = useContext(ThemeContext);
 
     let gameOverMessage;
@@ -28,4 +28,4 @@ function Score(props) {
     );
 }
 
-export default Score;
+export default ScoreScreen;

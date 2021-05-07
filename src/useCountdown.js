@@ -24,31 +24,16 @@ function useCountdown(seconds, runOnMount, onTimerZero) {
 
         return () => clearInterval(interval);
 
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [running]);
-
-    // Starts the countdown, only if not already running.
-    const start = useCallback(() => {
-        setRunning(prevState => {
-            return prevState ? prevState : !prevState;
-        });
-    }, []);
-
-    // Stops the countdown, only if already running.
-    const stop = useCallback(() => {
-        setRunning(prevState => {
-            return prevState ? !prevState : prevState;
-        });
-    }, []);
+    }, [running, onTimerZero]);
 
     // Resets the countdown timer to initial props value.
     const reset = useCallback(() => {
-        stop();
+        setRunning(false);
         setTimer(seconds);
-        start();
-    }, [seconds, start, stop]);
+        setRunning(true);
+    }, [seconds, setRunning]);
 
-    return { timer, running, start, stop, reset };
+    return { timer, running, setRunning, reset };
 }
 
 export default useCountdown;

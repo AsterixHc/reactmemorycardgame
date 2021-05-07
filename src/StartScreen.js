@@ -11,7 +11,12 @@ function StartScreen(props) {
 
     function handleClickStart() {
         props.setActiveScreen("single");
-        props.setNumberCardsCallback(selectInput);
+        props.setNumberCards(selectInput);
+    }
+
+    function handleClickMultiplayer() {
+        props.setActiveScreen("multi");
+        props.setNumberCards(selectInput);
     }
 
     return (
@@ -37,7 +42,7 @@ function StartScreen(props) {
                     <option>104</option>
                 </select>
             </div>
-            <button>
+            <button onClick={handleClickMultiplayer}>
                 MultiPlayer!
                 </button>
         </div>
