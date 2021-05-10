@@ -4,7 +4,7 @@ import MultiLobby from './MultiLobby';
 import useGameServer from './useGameServer';
 
 function Multiplayer(props) {
-    const { server, users } = useGameServer();
+    const { server, users, messages } = useGameServer(10);
     const [opponent, setOpponent] = useState(null);
 
     useEffect(() => {
@@ -23,11 +23,15 @@ function Multiplayer(props) {
                 ? <MultiGame
                     sendMessage={sendMessage}
                     users={users}
+                    messages={messages}
                     setActiveScreen={props.setActiveScreen}
                     onGameEnd={props.onGameEndCallback}
                     numberCards={props.numberCards}
                 />
-                : <MultiLobby sendMessage={sendMessage} users={users} />
+                : <MultiLobby
+                    sendMessage={sendMessage}
+                    users={users}
+                    messages={messages} />
             }
         </>
     );

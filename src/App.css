@@ -157,3 +157,17 @@ body, html {
 .card-front {
     transform: rotateY(180deg);
 }
+
+/* --- ChatBox component --- */
+.chat-box{
+    height: 350px;
+    width: 300px;
+    border: 1px solid rgba(0, 0, 0, 1);
+}
+
+.chat-box .messages{
+    height: 200px;
+    width: 300px;
+    border-top: 1px solid rgba(0, 0, 0, 1);
+    border-bottom: 1px solid rgba(0, 0, 0, 1);
+}

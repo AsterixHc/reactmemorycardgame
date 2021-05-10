@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { HubConnectionBuilder } from '@microsoft/signalr';
 
-function useGameServer() {
+function useGameServer(numberMessagesSaved) {
     // Creates the server object.
     const server = useMemo(() => {
         return (
@@ -13,6 +13,8 @@ function useGameServer() {
 
     // All users currently connected to the server.
     const [users, setUsers] = useState([]);
+
+    const [messages, setMessages] = useState([]);
 
     // Subscribes to server events with callbacks to handle them.
     useEffect(() => {
@@ -49,7 +51,17 @@ function useGameServer() {
         });
 
         server.on("Message", (sender, msg) => {
-            console.log(sender + ": " + msg); // Save messages to a state, return state (?)
+            setMessages(prevState => {
+                let newState = [...prevState];
+
+                newState.push(sender + ": " + msg);
+
+                if (newState.length > numberMessagesSaved) {
+                    newState.shift();
+                }
+
+                return newState;
+            });
         });
 
         server.start()
@@ -66,7 +78,7 @@ function useGameServer() {
         }
     }, [server]);
 
-    return { server, users } // What to return here? TBD
+    return { server, users, messages } // What to return here? TBD
 }
 
 export default useGameServer;
