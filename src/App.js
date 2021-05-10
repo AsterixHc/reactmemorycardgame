@@ -2,11 +2,11 @@ import React, { useState, useEffect, useCallback, useMemo } from "react"
 import { ThemeContext } from "./ThemeContext"
 import "./App.css"
 import SingleGame from "./SingleGame"
-import MultiGame from "./MultiGame"
 import ScoreScreen from './ScoreScreen'
 import StartScreen from "./StartScreen"
 import Navigation from "./Navigation"
 import useOnlineTheme from "./useOnlineTheme"
+import Multiplayer from "./Multiplayer"
 
 function App(props) {
     // Theme object fethed from API.
@@ -100,7 +100,7 @@ function App(props) {
                 <Navigation selectThemeCallback={selectThemeCallback} setActiveScreen={setActiveScreen} themes={themes}/>
                 {activeScreen === "start" && <StartScreen setActiveScreen={setActiveScreen} setNumberCards={setNumberCards} />}
                 {activeScreen === "single" && <SingleGame setActiveScreen={setActiveScreen} onGameEnd={onGameEndCallback} numberCards={numberCards} />}
-                {activeScreen === "multi" && <MultiGame setActiveScreen={setActiveScreen} onGameEnd={onGameEndCallback} numberCards={numberCards} />}
+                {activeScreen === "multi" && <Multiplayer setActiveScreen={setActiveScreen} onGameEnd={onGameEndCallback} numberCards={numberCards} />}
                 {activeScreen === "score" && <ScoreScreen score={gameStats.score} lives={gameStats.lives} timeRemaining={gameStats.timer} />}
             </ThemeContext.Provider>
         </div>

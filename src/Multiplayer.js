@@ -27,7 +27,7 @@ function Multiplayer(props) {
                     onGameEnd={props.onGameEndCallback}
                     numberCards={props.numberCards}
                 />
-                : <MultiLobby sendMessage={sendMessage} />
+                : <MultiLobby sendMessage={sendMessage} users={users} />
             }
         </>
     );
