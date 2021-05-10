@@ -11,10 +11,24 @@ function Card(props) {
     return (
         <div className={"card" + (props.flipped ? " flip" : "") + (props.hidden ? " hide" : "")} onClick={handleClick}>
             <div className="card-front">
-                <img alt="" src={theme.cardSource + props.sourceId + ".png"} />
+                <img
+                    alt=""
+                    src={
+                        theme.name === "online"
+                            ? theme.cardSource[props.sourceId]
+                            : theme.cardSource + props.sourceId + ".png"
+                    }
+                />
             </div>
             <div className="card-back">
-                <img alt="" src={theme.cardSource + "B.png"} />
+                <img
+                    alt=""
+                    src={
+                        theme.name === "online"
+                            ? theme.cardSource[52]
+                            : theme.cardSource + "B.png"
+                    }
+                />
             </div>
         </div>
     );

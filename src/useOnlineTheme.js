@@ -1,15 +1,20 @@
 import { useEffect, useState } from "react";
 
 function useOnlineTheme() {
-    // Token used for accessing themes API.
+    // Token used for accessing the themes API.
     const [accessToken, setAccessToken] = useState(null);
 
-    // The color codes fethed from API.
+    // An object containing the color codes fethed from API.
     const [colorCodes, setColorCodes] = useState(null);
 
-    useEffect(() => {
-        if (accessToken) return;
+    // An array of URL image locations fetched from API.
+    const [imageLocations, setImageLocations] = useState(null);
 
+    // The theme object returned by this custom hook.
+    const [theme, setTheme] = useState(null);
+
+    // Fetches the bearer token for API access.
+    useEffect(() => {
         let myHeaders = new Headers();
         myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
 
@@ -25,13 +30,17 @@ function useOnlineTheme() {
         };
 
         fetch("https://identity.complianty.com/connect/token", requestOptions)
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw Error("failed to receive ok when fetching access token");
+                }
+                return response.json();
+            })
             .then(json => setAccessToken(json.access_token))
-            .catch(error => console.log('error', error));
-    }, [accessToken]);
+            .catch(error => console.warn(error.message));
+    }, []);
 
-    console.log(accessToken); // TODO: Delete this when everything works.
-
+    // Upon access token received, fetches color codes.
     useEffect(() => {
         if (!accessToken) return;
 
@@ -44,12 +53,67 @@ function useOnlineTheme() {
         };
 
         fetch("http://api.gateway.admin.complianty.com/Tenants/v1/112/Tenants/112", requestOptions)
-            .then(response => response.json())
-            .then(result => console.log(result)) // TODO: Get the 'theming' property of response and put it in colorCodes. (Again, when everything works)
-            .catch(error => console.log('error', error));
+            .then(response => {
+                if (!response.ok) {
+                    throw Error("failed to receive ok when fetching color codes");
+                }
+                return response.json();
+            })
+            .then(json => setColorCodes(json.theming))
+            .catch(error => console.warn(error.message));
+
     }, [accessToken]);
 
-    return colorCodes;
+    // Upon access token received, fetches image locations.
+    useEffect(() => {
+        if (!accessToken) return;
+
+        let myHeaders = new Headers();
+        myHeaders.append("Authorization", "Bearer " + accessToken);
+
+        let requestOptions = {
+            method: 'GET',
+            headers: myHeaders
+        };
+
+        fetch("http://api.gateway.admin.complianty.com/ImageGalleries/v1/112/ImageGalleries/9/lazyload", requestOptions)
+            .then(response => {
+                if (!response.ok) {
+                    throw Error("failed to receive ok when fetching image locations");
+                }
+                return response.json();
+            })
+            .then(json => {
+                let imageObjects = json.imageGalleryImages;
+                let locationsArray = [];
+                imageObjects.forEach(element => {
+                    locationsArray.push(element.imageLocation);
+                });
+                setImageLocations(locationsArray);
+            })
+            .catch(error => console.warn(error.message));
+
+    }, [accessToken]);
+
+    // Upon all fetch requests successful, produces the theme object.
+    useEffect(() => {
+        if (!colorCodes || !imageLocations) return;
+
+        setTheme({
+            name: "online",
+            textColor: colorCodes.cssTextColor,
+            buttonColor: colorCodes.cssActionColor,
+            backgroundColor: colorCodes.cssFooterBackgroundColor,
+            menuColor: colorCodes.cssMenuColor,
+            backgroundBoxColor: colorCodes.cssBackgroundBoxColor,
+            buttonTextColor: colorCodes.cssFooterTextColor,
+            textShadow: "2px 2px 4px rgba(0, 0, 0, 0.8)",
+            cardSource: imageLocations // TODO: Ask if this is bad practice ("reusing" cardSource property for our array)
+        });
+
+    }, [colorCodes, imageLocations]);
+
+    return theme;
 }
 
 export default useOnlineTheme;

@@ -21,11 +21,11 @@ function StartScreen(props) {
 
     return (
 
-        <div id="start-screen" style={{ backgroundColor: theme.backgroundSub }}>
-            <button onClick={handleClickStart} >
+        <div className="start-screen" style={{ backgroundColor: theme.backgroundBoxColor }}>
+            <button onClick={handleClickStart} style={{backgroundColor: theme.buttonColor, color: theme.buttonTextColor, textShadow: theme.textShadow}}>
                 Start Game!
                 </button>
-            <div id="number-cards-select">
+            <div className="number-cards-select">
                 <label>Select number of cards: </label>
                 <br />
                 <select value={selectInput} onChange={handleChangeSelect}>
@@ -42,7 +42,7 @@ function StartScreen(props) {
                     <option>104</option>
                 </select>
             </div>
-            <button onClick={handleClickMultiplayer}>
+            <button onClick={handleClickMultiplayer} style={{backgroundColor: theme.buttonColor, color: theme.buttonTextColor, textShadow: theme.textShadow}}>
                 MultiPlayer!
                 </button>
         </div>

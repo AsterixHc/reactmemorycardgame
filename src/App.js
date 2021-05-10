@@ -9,52 +9,67 @@ import Navigation from "./Navigation"
 import useOnlineTheme from "./useOnlineTheme"
 
 function App(props) {
-    // TODO: Try API call to get theme, if fail, revert to default (In progress...)
-    // Token used for accessing themes API.
-    // const onlineTheme = useOnlineTheme(); // <-- Commented out until Jan can help.
+    // Theme object fethed from API.
+    const onlineTheme = useOnlineTheme();
 
+    // All available themes.
     const themes = useMemo(() => {
         return (
             {
                 default: {
                     name: "default",
-                    backgroundMain: "#00ffff",
-                    backgroundSub: "#ff8c00",
-                    window: "#ff8c00",
-                    text: "#000000",
+                    textColor: "#ffffff",
+                    buttonColor: "#ff8c00",
+                    backgroundColor: "#00ffff",
+                    menuColor: "#ff8c00",
+                    backgroundBoxColor: "#ff8c00",
+                    buttonTextColor: "#ffffff",
                     textShadow: "none",
                     cardSource: "./cards/default/"
                 },
                 vice: {
                     name: "vice",
-                    backgroundMain: "#0bd3d3",
-                    backgroundSub: "#f890e7",
-                    window: "#d0d0d0",
-                    text: "#ffffff",
-                    textShadow: "0px 0px 4px rgba(0, 0, 0, 0.8)",
+                    textColor: "#ffffff",
+                    backgroundColor: "#d0d0d0",
+                    backgroundBoxColor: "#0bd3d3",
+                    buttonColor: "#f890e7",
+                    buttonTextColor: "#ffffff",
+                    menuColor: "#f890e7",
+                    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.8)",
                     cardSource: "./cards/vice/"
-                }
+                },
+                online: onlineTheme
             }
         );
-    }, []);
+    }, [onlineTheme]);
 
+    // The theme that is currently active.
     const [activeTheme, setActiveTheme] = useState(themes.default);
+
+    // The screen that is currently being rendered.
     const [activeScreen, setActiveScreen] = useState("start");
-    const [numberCards, setNumberCards] = useState(2);
+
+    // The number of cards being dealt when starting a game (variable from start screen).
+    const [numberCards, setNumberCards] = useState(10);
+
+    // Relevant stats from a finished game to be passed on to score screen.
     const [gameStats, setGameStats] = useState({ score: 0, lives: 0, timer: 0 });
 
+    // Sets the background of entire app, using evil html.
     useEffect(() => {
-        document.body.style.backgroundColor = activeTheme.backgroundMain;
+        document.body.style.backgroundColor = activeTheme.backgroundColor;
     }, [activeTheme]);
 
+    // Callback that sets the game stats when a game finishes.
     const onGameEndCallback = useCallback((score, lives, timer) => {
         setGameStats({ score, lives, timer });
     }, []);
 
+    // Callback that sets the currently active theme.
     const selectThemeCallback = useCallback(themeName => {
-        setActiveTheme(prevState => {
-            if (prevState.name === themeName) return;
+        if (activeTheme.name === themeName) return;
 
+        setActiveTheme(() => {
             let newState;
 
             switch (themeName) {
@@ -66,7 +81,9 @@ function App(props) {
                     newState = themes.vice;
                     break;
 
-                // TODO: More here.
+                case "online":
+                    newState = themes.online;
+                    break;
 
                 default:
                     newState = themes.default;
@@ -75,12 +92,12 @@ function App(props) {
 
             return newState;
         });
-    }, [themes]);
+    }, [themes, activeTheme]);
 
     return (
-        <div id="App" style={{ color: activeTheme.text, textShadow: activeTheme.textShadow }}>
+        <div className="app" style={{ color: activeTheme.textColor, textShadow: activeTheme.textShadow }}>
             <ThemeContext.Provider value={activeTheme}>
-                <Navigation selectThemeCallback={selectThemeCallback} setActiveScreen={setActiveScreen} />
+                <Navigation selectThemeCallback={selectThemeCallback} setActiveScreen={setActiveScreen} themes={themes}/>
                 {activeScreen === "start" && <StartScreen setActiveScreen={setActiveScreen} setNumberCards={setNumberCards} />}
                 {activeScreen === "single" && <SingleGame setActiveScreen={setActiveScreen} onGameEnd={onGameEndCallback} numberCards={numberCards} />}
                 {activeScreen === "multi" && <MultiGame setActiveScreen={setActiveScreen} onGameEnd={onGameEndCallback} numberCards={numberCards} />}

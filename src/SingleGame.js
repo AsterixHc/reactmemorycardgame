@@ -21,7 +21,7 @@ function SingleGame(props) {
     const [lives, setLives] = useState(5);
 
     // A coundown providing the remaining time.
-    const { timer, setRunning: setTimerRunning } = useCountdown(30, false, () => { setGameState("game-over") });
+    const { timer, setRunning: setTimerRunning } = useCountdown((5 * props.numberCards), false, () => { setGameState("game-over") });
 
     // Handle game state: init
     useEffect(() => {
@@ -144,7 +144,7 @@ function SingleGame(props) {
     }, [gameState, chosenCards, deck])
 
     return (
-        <div id="game">
+        <div className="game">
             <CardContainer deck={deck} handleCardClick={handleCardClick} />
             <Sidebar score={score} lives={lives} timeRemaining={timer} />
         </div>

@@ -3,6 +3,8 @@ import useRandomizedDeck from "./useRandomizedDeck"
 import useCountdown from "./useCountdown"
 import Sidebar from "./Sidebar"
 import CardContainer from "./CardContainer"
+import useGameServer from "./useGameServer"
+import ChatBox from "./ChatBox"
 
 function MultiGame(props) {
     // A deck of card pairs, size specified by props.
@@ -21,7 +23,9 @@ function MultiGame(props) {
     const [lives, setLives] = useState(5);
 
     // A coundown providing the remaining time.
-    const { timer, setRunning: setTimerRunning } = useCountdown(30, false, () => { setGameState("game-over") });
+    const { timer, setRunning: setTimerRunning } = useCountdown((5 * props.numberCards), false, () => { setGameState("game-over") });
+
+    const server = useGameServer(); // TODO: Temporary for the time being. Testing server.
 
     // Handle game state: init
     useEffect(() => {
@@ -38,6 +42,8 @@ function MultiGame(props) {
                 return newState;
             });
         }
+
+        // TODO: Query server: first move or second move?
 
         // After 0.5 seconds, flip all cards for 1.5 seconds.
         let timeout = setTimeout(() => {
@@ -99,7 +105,7 @@ function MultiGame(props) {
 
             setChosenCards({ first: null, second: null });
             setGameState("opponent-turn");
-            
+
         }, 1000);
 
         return () => clearTimeout(timeout);
@@ -143,21 +149,24 @@ function MultiGame(props) {
                 newState.second = card;
                 setGameState("process-choice");
             }
-            
+
             return newState;
         });
 
     }, [gameState, chosenCards, deck])
 
     return (
-        <div id="game">
+        <div className="game multiplayer">
             <CardContainer deck={deck} handleCardClick={handleCardClick} />
-            <Sidebar score={score} lives={lives} timeRemaining={timer} />
-            <button
-                hidden={gameState !== "opponent-turn"}
-                onClick={() => {setGameState("await-card-1")}}>
+            <div className="multi-side">
+                <Sidebar score={score} lives={lives} timeRemaining={timer} />
+                <button
+                    disabled={gameState === "opponent-turn"}
+                    onClick={() => { setGameState("await-card-1") }}>
                     gib turn pls
-            </button>
+                </button>
+                <ChatBox />
+            </div>
         </div>
     )
 }

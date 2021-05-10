@@ -5,13 +5,13 @@ body, html {
 }
 
 /* --- App component --- */
-#App{
+.app{
     display: flex;
     flex-direction: column;
 }
 
 /* --- Navigation component --- */
-#nav ul{
+.nav ul{
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
@@ -19,25 +19,27 @@ body, html {
     list-style-type: none;
     margin: 0;
     padding: 0;
+    box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.3);
+
 }
 
-#nav li{
+.nav li{
     padding: 10px;
     border-right: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-#nav li:not(#theme-select):hover{
+.nav li:not(.theme-select):hover{
     cursor: pointer;
     background-color: rgba(0, 0, 0, 0.1);
 }
 
-#theme-select{
+.theme-select{
     margin-left: auto;
     border-right: none;
 }
 
 /* --- StartScreen component --- */
-#start-screen{
+.start-screen{
     display: flex;
     flex-direction: column;
     justify-content: space-around;
@@ -49,24 +51,25 @@ body, html {
     margin: 20px;
     padding: 20px;
     border-radius: 13px;
+    box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.3);
 }
 
-#start-screen button{
+.start-screen button{
     padding: 10px;
     box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.3);
 }
 
-#number-cards-select select{
+.number-cards-select select{
     padding: 5px;
 }
 
-#number-cards-select{
+.number-cards-select{
     text-align: center;
     padding: 20px;
 }
 
 /* --- Game component --- */
-#game{
+.game{
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -74,7 +77,7 @@ body, html {
     align-self: stretch;
 }
 
-#card-container {
+.card-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, 200px);
     grid-auto-rows: 310px;
@@ -88,10 +91,11 @@ body, html {
     border-radius: 13px;
     padding: 20px;
     margin: 20px;
+    box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.3);
 }
 
 /* --- Sidebar component --- */
-#sidebar{
+.sidebar{
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -102,19 +106,21 @@ body, html {
     margin: 20px;
     margin-left: 0;
     min-width: 200px;
+    box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.3);
 }
 
 /* --- Score component --- */
-#score{
+.score{
     display: flex;
     flex-direction: column;
     align-self: center;
     border-radius: 13px;
     padding: 20px;
     margin-top: 20px;
+    box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.3);
 }
 
-#score hr{
+.score hr{
     margin-left: 0;
     margin-right: 0;
 }
