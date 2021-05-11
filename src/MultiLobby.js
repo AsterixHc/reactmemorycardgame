@@ -1,16 +1,19 @@
-import React from 'react';
-import ChatBox from './ChatBox';
+import React, { useContext } from 'react';
+import ChatWindow from './ChatWindow';
+import { ServerContext } from './ServerContext';
+import { ThemeContext } from './ThemeContext';
 
 function MultiLobby(props) {
-
+    const theme = useContext(ThemeContext);
+    const server = useContext(ServerContext);
 
     return (
-        <div className="multi-lobby">
-            <h1>Waiting for a game...</h1>
-            <ChatBox
-                users={props.users}
-                sendMessage={props.sendMessage}
-                messages={props.messages} />
+        <div className="lobby">
+            <div className="user-list" style={{backgroundColor: theme.backgroundBoxColor}}>
+                <h3>Active users:</h3>
+                {server.users.map(user => <p key={user}>{user}</p>)}
+            </div>
+            <ChatWindow />
         </div>
     );
 }

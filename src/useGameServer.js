@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { HubConnectionBuilder } from '@microsoft/signalr';
 
-function useGameServer(numberMessagesSaved) {
+function useGameServer() {
     // Creates the server object.
     const server = useMemo(() => {
         return (
@@ -14,7 +14,30 @@ function useGameServer(numberMessagesSaved) {
     // All users currently connected to the server.
     const [users, setUsers] = useState([]);
 
-    const [messages, setMessages] = useState([]);
+    // Array of the latest messages received from other users.
+    const [gameEventMessages, setGameEventMessages] = useState([]);
+
+    const [chatMessages, setChatMessages] = useState([]);
+
+    // TODO: Split messages up into 2 states: chat and system?
+
+    // const invoke = useCallback((methodName, ...args) => {
+    //     server.invoke(methodName, ...args)
+    //     .catch(() => console.warn("Failed to invoke method: " + methodName));
+    // }, [server]);
+
+    const sendMessage = useCallback((msgType, receiver, msg) => {
+        // construct JSON object.
+        let json = {
+            type: msgType,
+            content: msg
+        }
+
+        console.log("constructed json: " + json);
+
+        // send JSON object.
+        server.invoke("Message", receiver, JSON.stringify(json))
+    }, [server]);
 
     // Subscribes to server events with callbacks to handle them.
     useEffect(() => {
@@ -22,9 +45,6 @@ function useGameServer(numberMessagesSaved) {
         // Sets initial users upon making a successful connection.
         server.on("ConnectedUsers", users => {
             setUsers(users);
-
-            console.log("Connected users: " + users);
-
         });
 
         server.on("UserConnected", user => {
@@ -35,33 +55,62 @@ function useGameServer(numberMessagesSaved) {
                 return newState;
             });
 
-            console.log("user connected: " + user);
-        });
-
-        server.on("UserDisconnected", user => {
-            setUsers(prevState => {
+            setChatMessages(prevState => {
                 let newState = [...prevState];
-                let userIndex = newState.findIndex(element => element === user); // ? Maybe this is fine - test later: newstate.findIndex(user)
-                newState.splice(userIndex, 1);
+                newState.push(user + " connected!");
 
-                return newState;
-            });
-
-            console.log("user disconnected: " + user);
-        });
-
-        server.on("Message", (sender, msg) => {
-            setMessages(prevState => {
-                let newState = [...prevState];
-
-                newState.push(sender + ": " + msg);
-
-                if (newState.length > numberMessagesSaved) {
+                if (newState.length > 10) {
                     newState.shift();
                 }
 
                 return newState;
             });
+        });
+
+        server.on("UserDisconnected", user => {
+            setUsers(prevState => {
+                let newState = [...prevState];
+                let userIndex = newState.findIndex(element => element === user);
+                newState.splice(userIndex, 1);
+
+                return newState;
+            });
+
+            setChatMessages(prevState => {
+                let newState = [...prevState];
+                newState.push(user + " disconnected!");
+
+                if (newState.length > 10) {
+                    newState.shift();
+                }
+
+                return newState;
+            });
+        });
+
+        server.on("Message", (sender, msg) => {
+
+            // sort message into states according to its type
+            let json = msg.json();
+            console.log("received json: " + json);
+
+            if (json.msgType === "chat") {
+                setChatMessages(prevState => {
+                    let newState = [...prevState];
+    
+                    newState.push(sender + ": " + json.msg);
+    
+                    if (newState.length > 10) {
+                        newState.shift();
+                    }
+    
+                    return newState;
+                });
+            }
+
+            if (json.msgType === "gameEvent") {
+                // noget andet...
+            }
         });
 
         server.start()
@@ -78,7 +127,8 @@ function useGameServer(numberMessagesSaved) {
         }
     }, [server]);
 
-    return { server, users, messages } // What to return here? TBD
+    // return { server, users, messages };
+    return {users, chatMessages, gameEventMessages, sendMessage};
 }
 
 export default useGameServer;

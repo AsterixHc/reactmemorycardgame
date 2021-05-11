@@ -1,39 +1,35 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import MultiGame from './MultiGame';
 import MultiLobby from './MultiLobby';
+import { ServerContext } from './ServerContext';
 import useGameServer from './useGameServer';
 
 function Multiplayer(props) {
-    const { server, users, messages } = useGameServer(10);
-    const [opponent, setOpponent] = useState(null);
+    const server = useGameServer();
+    const [opponent] = useState(null);
 
     useEffect(() => {
         if (opponent) return;
 
+        // Logic for getting a match with another player goes here.
+
         // while not in a game, request other users for a game.
+        // OR set up an invite system, may be just as easy/easier.
     }, [opponent]);
 
-    const sendMessage = useCallback((receiver, msg) => {
-        server.invoke("Message", receiver, msg)
-    }, [server]);
-
     return (
-        <>
-            {opponent
-                ? <MultiGame
-                    sendMessage={sendMessage}
-                    users={users}
-                    messages={messages}
-                    setActiveScreen={props.setActiveScreen}
-                    onGameEnd={props.onGameEndCallback}
-                    numberCards={props.numberCards}
-                />
-                : <MultiLobby
-                    sendMessage={sendMessage}
-                    users={users}
-                    messages={messages} />
-            }
-        </>
+        <div className="multiplayer">
+            <ServerContext.Provider value={server}>
+                {opponent
+                    ? <MultiGame
+                        setActiveScreen={props.setActiveScreen} // test this, might need callbacks.
+                        onGameEnd={props.onGameEndCallback} // test this, might need callbacks.
+                        numberCards={props.numberCards}
+                    />
+                    : <MultiLobby />
+                }
+            </ServerContext.Provider>
+        </div>
     );
 }
 

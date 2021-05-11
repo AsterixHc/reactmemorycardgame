@@ -24,7 +24,7 @@ function App(props) {
                     menuColor: "#ff8c00",
                     backgroundBoxColor: "#ff8c00",
                     buttonTextColor: "#ffffff",
-                    textShadow: "none",
+                    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.8)",
                     cardSource: "./cards/default/"
                 },
                 vice: {

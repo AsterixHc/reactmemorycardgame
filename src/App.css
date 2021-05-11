@@ -20,7 +20,6 @@ body, html {
     margin: 0;
     padding: 0;
     box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.3);
-
 }
 
 .nav li{
@@ -158,16 +157,41 @@ body, html {
     transform: rotateY(180deg);
 }
 
-/* --- ChatBox component --- */
-.chat-box{
-    height: 350px;
-    width: 300px;
-    border: 1px solid rgba(0, 0, 0, 1);
+/* --- MultiLobby component --- */
+.lobby{
+    display: flex;
+    justify-content: center;
 }
 
-.chat-box .messages{
-    height: 200px;
+.lobby .user-list{
+    /* flex size later, maybe */
+    /* then use min-width, min-height etc. */
+    height: 350px;
     width: 300px;
-    border-top: 1px solid rgba(0, 0, 0, 1);
-    border-bottom: 1px solid rgba(0, 0, 0, 1);
+    border-radius: 13px;
+    padding: 10px;
+    margin: 10px;
+    box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.3);
+}
+
+.lobby .chat-window{
+    display: flex;
+    flex-direction: column;
+
+    /* flex size later, maybe */
+    /* then use min-width, min-height etc. */
+    height: 350px;
+    width: 300px;
+    border-radius: 13px;
+    padding: 10px;
+    margin: 10px;
+    box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.3);
+}
+
+.lobby .chat-window .messages{
+    height: 100%;
+    resize: none;
+    border-radius: 13px;
+
+    margin-bottom: 5px;
 }

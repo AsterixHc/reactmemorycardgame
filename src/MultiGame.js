@@ -3,8 +3,7 @@ import useRandomizedDeck from "./useRandomizedDeck"
 import useCountdown from "./useCountdown"
 import Sidebar from "./Sidebar"
 import CardContainer from "./CardContainer"
-import useGameServer from "./useGameServer"
-import ChatBox from "./ChatBox"
+import ChatWindow from "./ChatWindow"
 
 function MultiGame(props) {
     // A deck of card pairs, size specified by props.
@@ -24,8 +23,6 @@ function MultiGame(props) {
 
     // A coundown providing the remaining time.
     const { timer, setRunning: setTimerRunning } = useCountdown((5 * props.numberCards), false, () => { setGameState("game-over") });
-
-    const server = useGameServer(); // TODO: Temporary for the time being. Testing server.
 
     // Handle game state: init
     useEffect(() => {
@@ -165,7 +162,7 @@ function MultiGame(props) {
                     onClick={() => { setGameState("await-card-1") }}>
                     gib turn pls
                 </button>
-                <ChatBox />
+                <ChatWindow />
             </div>
         </div>
     )
