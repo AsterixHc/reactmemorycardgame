@@ -1,5 +1,6 @@
 import React, { useContext } from 'react';
 import ChatWindow from './ChatWindow';
+import UserList from './UserList';
 import { ServerContext } from './ServerContext';
 import { ThemeContext } from './ThemeContext';
 
@@ -9,10 +10,7 @@ function MultiLobby(props) {
 
     return (
         <div className="lobby">
-            <div className="user-list" style={{backgroundColor: theme.backgroundBoxColor}}>
-                <h3>Active users:</h3>
-                {server.users.map(user => <p key={user}>{user}</p>)}
-            </div>
+            <UserList />
             <ChatWindow />
         </div>
     );

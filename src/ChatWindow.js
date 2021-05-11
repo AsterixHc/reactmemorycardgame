@@ -19,8 +19,6 @@ function ChatWindow(props) {
     function sendMessage() {
         if (messageInput === "") return;
 
-        // TODO: Is there an 'all' receiver option? (including self?)
-        // TODO: Also: A good way to include own sent messages in chat? (simply expose setMessages?)
         server.users.forEach(user => {
             server.sendMessage("chat", user, messageInput);
         });

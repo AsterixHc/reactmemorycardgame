@@ -15,7 +15,7 @@ function useGameServer() {
     const [users, setUsers] = useState([]);
 
     // Array of the latest messages received from other users.
-    const [gameEventMessages, setGameEventMessages] = useState([]);
+    const [gameEvents, setGameEvents] = useState([]);
 
     const [chatMessages, setChatMessages] = useState([]);
 
@@ -26,17 +26,21 @@ function useGameServer() {
     //     .catch(() => console.warn("Failed to invoke method: " + methodName));
     // }, [server]);
 
-    const sendMessage = useCallback((msgType, receiver, msg) => {
+    const sendMessage = useCallback((type, receiver, content) => {
         // construct JSON object.
-        let json = {
-            type: msgType,
-            content: msg
+        let messageObject = { type, content }
+
+        if (type === "chat") {
+            setChatMessages(prevState => {
+                let newState = [...prevState];
+                newState.push("Me: " + content);
+
+                return newState;
+            });
         }
 
-        console.log("constructed json: " + json);
-
         // send JSON object.
-        server.invoke("Message", receiver, JSON.stringify(json))
+        server.invoke("Message", receiver, JSON.stringify(messageObject))
     }, [server]);
 
     // Subscribes to server events with callbacks to handle them.
@@ -90,26 +94,30 @@ function useGameServer() {
 
         server.on("Message", (sender, msg) => {
 
-            // sort message into states according to its type
-            let json = msg.json();
-            console.log("received json: " + json);
+            let messageObject = JSON.parse(msg);
 
-            if (json.msgType === "chat") {
+            if (messageObject.type === "chat") {
                 setChatMessages(prevState => {
                     let newState = [...prevState];
-    
-                    newState.push(sender + ": " + json.msg);
-    
+                    newState.push(sender + ": " + messageObject.content);
+
                     if (newState.length > 10) {
                         newState.shift();
                     }
-    
+
                     return newState;
                 });
             }
 
-            if (json.msgType === "gameEvent") {
-                // noget andet...
+            if (messageObject.type === "gameEvent") {
+                console.log(JSON.parse(msg));
+
+                setGameEvents(prevState => {
+                    let newState = [...prevState];
+                    newState.push(JSON.parse(msg));
+
+                    return newState;
+                });
             }
         });
 
@@ -128,7 +136,7 @@ function useGameServer() {
     }, [server]);
 
     // return { server, users, messages };
-    return {users, chatMessages, gameEventMessages, sendMessage};
+    return { users, chatMessages, gameEventMessages: gameEvents, sendMessage };
 }
 
 export default useGameServer;
