@@ -1,16 +1,15 @@
-/* --- global --- */
+/* --- Global --- */
 body, html {
     height: 100%;
     margin: 0;
 }
 
-/* --- App component --- */
+/* --- General --- */
 .app{
     display: flex;
     flex-direction: column;
 }
 
-/* --- Navigation component --- */
 .nav ul{
     display: flex;
     flex-direction: row;
@@ -37,7 +36,6 @@ body, html {
     border-right: none;
 }
 
-/* --- StartScreen component --- */
 .start-screen{
     display: flex;
     flex-direction: column;
@@ -67,7 +65,7 @@ body, html {
     padding: 20px;
 }
 
-/* --- Game component --- */
+/* --- Game Elements--- */
 .game{
     display: flex;
     flex-direction: row;
@@ -93,7 +91,6 @@ body, html {
     box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.3);
 }
 
-/* --- Sidebar component --- */
 .sidebar{
     display: flex;
     flex-direction: column;
@@ -108,7 +105,6 @@ body, html {
     box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.3);
 }
 
-/* --- Score component --- */
 .score{
     display: flex;
     flex-direction: column;
@@ -124,7 +120,6 @@ body, html {
     margin-right: 0;
 }
 
-/* --- Card component --- */
 .card {
     border-radius: 13px;
     box-shadow: 0 0 5px 4px rgb(0, 0, 0, .2);
@@ -157,28 +152,36 @@ body, html {
     transform: rotateY(180deg);
 }
 
-/* --- MultiLobby component --- */
+/* --- Multiplayer Elements--- */
 .lobby{
     display: flex;
     justify-content: center;
 }
 
-.lobby .user-list{
-    /* flex size later, maybe */
+.user-list{
+    /* flex-grow later, maybe */
     /* then use min-width, min-height etc. */
-    height: 350px;
-    width: 300px;
+    min-width: 400px;
     border-radius: 13px;
     padding: 10px;
     margin: 10px;
     box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.3);
 }
 
+.user-list .item{
+    display: flex;
+    padding: 5px;
+    justify-content: space-between;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+}
+
 .lobby .chat-window{
     display: flex;
     flex-direction: column;
 
-    /* flex size later, maybe */
+    /* flex-grow later, maybe */
     /* then use min-width, min-height etc. */
     height: 350px;
     width: 300px;

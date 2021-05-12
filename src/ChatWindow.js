@@ -20,7 +20,7 @@ function ChatWindow(props) {
         if (messageInput === "") return;
 
         server.users.forEach(user => {
-            server.sendMessage("chat", user, messageInput);
+            server.sendMessage("Chat", user, messageInput);
         });
 
         setMessageInput("");

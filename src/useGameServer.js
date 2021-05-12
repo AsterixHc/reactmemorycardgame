@@ -3,7 +3,7 @@ import { HubConnectionBuilder } from '@microsoft/signalr';
 
 function useGameServer() {
     // Creates the server object.
-    const server = useMemo(() => {
+    const connection = useMemo(() => {
         return (
             new HubConnectionBuilder()
                 .withUrl("http://jats.web.eadania.dk/proxyhub")
@@ -15,43 +15,38 @@ function useGameServer() {
     const [users, setUsers] = useState([]);
 
     // Array of the latest messages received from other users.
-    const [gameEvents, setGameEvents] = useState([]);
+    const [gameEvent, setGameEvent] = useState(null);
 
     const [chatMessages, setChatMessages] = useState([]);
 
-    // TODO: Split messages up into 2 states: chat and system?
-
-    // const invoke = useCallback((methodName, ...args) => {
-    //     server.invoke(methodName, ...args)
-    //     .catch(() => console.warn("Failed to invoke method: " + methodName));
-    // }, [server]);
-
     const sendMessage = useCallback((type, receiver, content) => {
-        // construct JSON object.
-        let messageObject = { type, content }
-
-        if (type === "chat") {
+        // Ensures own chat messages show in messages array.
+        if (type === "Chat") {
             setChatMessages(prevState => {
                 let newState = [...prevState];
                 newState.push("Me: " + content);
+
+                if (newState.length > 10) {
+                    newState.shift();
+                }
 
                 return newState;
             });
         }
 
-        // send JSON object.
-        server.invoke("Message", receiver, JSON.stringify(messageObject))
-    }, [server]);
+        let msgObject = { type, content };
+        connection.invoke("Message", receiver, JSON.stringify(msgObject));
+    }, [connection]);
 
     // Subscribes to server events with callbacks to handle them.
     useEffect(() => {
 
         // Sets initial users upon making a successful connection.
-        server.on("ConnectedUsers", users => {
+        connection.on("ConnectedUsers", users => {
             setUsers(users);
         });
 
-        server.on("UserConnected", user => {
+        connection.on("UserConnected", user => {
             setUsers(prevState => {
                 let newState = [...prevState];
                 newState.push(user);
@@ -71,7 +66,7 @@ function useGameServer() {
             });
         });
 
-        server.on("UserDisconnected", user => {
+        connection.on("UserDisconnected", user => {
             setUsers(prevState => {
                 let newState = [...prevState];
                 let userIndex = newState.findIndex(element => element === user);
@@ -92,14 +87,14 @@ function useGameServer() {
             });
         });
 
-        server.on("Message", (sender, msg) => {
+        connection.on("Message", (sender, msg) => {
 
-            let messageObject = JSON.parse(msg);
+            let msgObject= JSON.parse(msg);
 
-            if (messageObject.type === "chat") {
+            if (msgObject.type === "Chat") {
                 setChatMessages(prevState => {
                     let newState = [...prevState];
-                    newState.push(sender + ": " + messageObject.content);
+                    newState.push(sender + ": " + msgObject.content);
 
                     if (newState.length > 10) {
                         newState.shift();
@@ -109,34 +104,27 @@ function useGameServer() {
                 });
             }
 
-            if (messageObject.type === "gameEvent") {
-                console.log(JSON.parse(msg));
-
-                setGameEvents(prevState => {
-                    let newState = [...prevState];
-                    newState.push(JSON.parse(msg));
-
-                    return newState;
-                });
+            if (msgObject.type === "GameEvent") {
+                setGameEvent({sender, ...msgObject});
             }
         });
 
-        server.start()
+        connection.start()
             .then(() => console.log("Connected to server!"))
             .catch(error => console.log(error));
 
         return () => {
-            server.off("ConnectedUsers");
-            server.off("UserConnected");
-            server.off("UserDisconnected");
-            server.off("Message");
-            server.stop()
+            connection.off("ConnectedUsers");
+            connection.off("UserConnected");
+            connection.off("UserDisconnected");
+            connection.off("Message");
+            connection.stop()
                 .then(() => console.log("Disconnected from server."));
         }
-    }, [server]);
+    }, [connection]);
 
     // return { server, users, messages };
-    return { users, chatMessages, gameEventMessages: gameEvents, sendMessage };
+    return { users, chatMessages, gameEvent, sendMessage };
 }
 
 export default useGameServer;

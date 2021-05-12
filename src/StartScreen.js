@@ -29,7 +29,6 @@ function StartScreen(props) {
                 <label>Select number of cards: </label>
                 <br />
                 <select value={selectInput} onChange={handleChangeSelect}>
-                    <option>2</option>
                     <option>4</option>
                     <option>6</option>
                     <option>8</option>

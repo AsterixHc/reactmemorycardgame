@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react"
+import "./app.css"
 import { ThemeContext } from "./ThemeContext"
-import "./App.css"
 import SingleGame from "./SingleGame"
 import ScoreScreen from './ScoreScreen'
 import StartScreen from "./StartScreen"
