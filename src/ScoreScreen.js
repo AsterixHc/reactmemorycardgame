@@ -1,5 +1,6 @@
 import React, { useContext } from "react"
 import { ThemeContext } from "./ThemeContext";
+import './stylesheets/scorescreen.css'
 
 function ScoreScreen(props) {
     const theme = useContext(ThemeContext);

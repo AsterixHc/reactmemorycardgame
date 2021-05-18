@@ -1,5 +1,6 @@
 import React, { useContext, useState } from "react"
 import { ThemeContext } from "./ThemeContext";
+import './stylesheets/startscreen.css'
 
 function StartScreen(props) {
     const theme = useContext(ThemeContext);

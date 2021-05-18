@@ -1,13 +1,16 @@
-import React, { useEffect, useState, useCallback } from "react"
-import useRandomizedDeck from "./useRandomizedDeck"
-import useCountdown from "./useCountdown"
+import React, { useEffect, useState, useCallback, useContext } from "react"
+import useRandomizedDeck from "./customhooks/useRandomizedDeck"
+import useCountdown from "./customhooks/useCountdown"
 import Sidebar from "./Sidebar"
 import CardContainer from "./CardContainer"
 import ChatWindow from "./ChatWindow"
+import { ServerContext } from "./ServerContext"
 
 function MultiGame(props) {
+    const server = useContext(ServerContext);
+
     // A deck of card pairs, size specified by props.
-    const { deck, setDeck } = useRandomizedDeck(props.numberCards);
+    const { deck, setDeck } = useRandomizedDeck();
 
     // The cards that player has chosen to flip.
     const [chosenCards, setChosenCards] = useState({ first: null, second: null });
@@ -22,11 +25,13 @@ function MultiGame(props) {
     const [lives, setLives] = useState(5);
 
     // A coundown providing the remaining time.
-    const { timer, setRunning: setTimerRunning } = useCountdown((5 * props.numberCards), false, () => { setGameState("game-over") });
+    const { timer, setRunning: setTimerRunning } = useCountdown((500 * props.numberCards), false, () => { setGameState("game-over") });
 
     // Handle game state: init
     useEffect(() => {
         if (gameState !== "init") return;
+
+        console.log(props.deck);
 
         function flipAllCards() {
             setDeck(prevState => {
@@ -40,8 +45,6 @@ function MultiGame(props) {
             });
         }
 
-        // TODO: Query server: first move or second move?
-
         // After 0.5 seconds, flip all cards for 1.5 seconds.
         let timeout = setTimeout(() => {
             flipAllCards();
@@ -50,14 +53,13 @@ function MultiGame(props) {
             timeout = setTimeout(() => {
                 flipAllCards();
                 setTimerRunning(true);
-                let random = Math.round(Math.random()); // TODO: replace with server logic at some point.
-                setGameState(random === 1 ? "await-card-1" : "opponent-turn");
+                setGameState(props.firstMove ? "await-card-1" : "opponent-turn");
             }, 1500);
         }, 500);
 
         return () => clearTimeout(timeout);
 
-    }, [gameState, setDeck, setTimerRunning]);
+    }, [gameState, setDeck, setTimerRunning, props]);
 
     // Handle game state: process-choice
     useEffect(() => {
@@ -119,8 +121,8 @@ function MultiGame(props) {
         if (gameState !== "game-over") return;
 
         setTimerRunning(false);
-        props.onGameEnd(score, lives, timer);
-        props.setActiveScreen("score");
+        // TODO: Show score etc.
+        props.setMultiplayerState("show-score");
 
     }, [gameState, setTimerRunning, props, score, lives, timer]);
 
@@ -157,12 +159,12 @@ function MultiGame(props) {
             <CardContainer deck={deck} handleCardClick={handleCardClick} />
             <div className="multi-side">
                 <Sidebar score={score} lives={lives} timeRemaining={timer} />
-                <button
+                {/* <button
                     disabled={gameState === "opponent-turn"}
                     onClick={() => { setGameState("await-card-1") }}>
                     gib turn pls
-                </button>
-                <ChatWindow />
+                </button> */}
+                <ChatWindow opponent={props.opponent}/>
             </div>
         </div>
     )

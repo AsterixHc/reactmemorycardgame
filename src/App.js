@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react"
-import "./app.css"
+import "./stylesheets/app.css"
 import { ThemeContext } from "./ThemeContext"
 import SingleGame from "./SingleGame"
 import ScoreScreen from './ScoreScreen'
 import StartScreen from "./StartScreen"
 import Navigation from "./Navigation"
-import useOnlineTheme from "./useOnlineTheme"
+import useOnlineTheme from "./customhooks/useOnlineTheme"
 import Multiplayer from "./Multiplayer"
 
 function App(props) {

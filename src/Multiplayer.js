@@ -1,32 +1,35 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import MultiGame from './MultiGame';
-import MultiLobby from './MultiLobby';
+import Lobby from './Lobby';
 import { ServerContext } from './ServerContext';
-import useGameServer from './useGameServer';
+import useGameServer from './customhooks/useGameServer';
+import useRandomizedDeck from './customhooks/useRandomizedDeck';
 
 function Multiplayer(props) {
     const server = useGameServer();
-    const [opponent] = useState(null);
-
-    useEffect(() => {
-        if (opponent) return;
-
-        // Logic for getting a match with another player goes here.
-
-        // while not in a game, request other users for a game.
-        // OR set up an invite system, may be just as easy/easier.
-    }, [opponent]);
+    const [multiplayerState, setMultiplayerState] = useState("idle"); // Possible states of multiplay: idle, await, invited, playing, show-score
+    const [activeMatch, setActiveMatch] = useState(null); // {opponent: string, firstMove: bool}
+    const {deck, setDeck, get: getDeck} = useRandomizedDeck();
 
     return (
         <div className="multiplayer">
             <ServerContext.Provider value={server}>
-                {opponent
-                    ? <MultiGame
-                        setActiveScreen={props.setActiveScreen} // test this, might need callbacks.
-                        onGameEnd={props.onGameEndCallback} // test this, might need callbacks.
-                        numberCards={props.numberCards}
+                {multiplayerState !== "playing"
+                    ? <Lobby
+                        multiplayerState={multiplayerState}
+                        setMultiplayerState={setMultiplayerState}
+                        setActiveMatch={setActiveMatch}
+                        deck={deck}
+                        getDeck={getDeck}
+                        setDeck={setDeck}
                     />
-                    : <MultiLobby />
+                    : <MultiGame
+                        setMultiplayerState={setMultiplayerState} // May not need this - Lobby->MutiGame->Lobby etc. (do something else with score screen)
+                        opponent={activeMatch.opponent}
+                        deck={deck}
+                        setDeck={setDeck}
+                        firstMove={activeMatch.firstMove}
+                    />
                 }
             </ServerContext.Provider>
         </div>

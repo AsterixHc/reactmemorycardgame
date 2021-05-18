@@ -1,5 +1,6 @@
 import React, { useContext } from 'react';
 import { ThemeContext } from './ThemeContext';
+import './stylesheets/cardcontainer.css'
 import Card from './Card';
 
 function CardContainer(props) {

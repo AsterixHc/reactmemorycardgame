@@ -1,5 +1,6 @@
 import React, { useContext } from "react"
 import { ThemeContext } from "./ThemeContext"
+import './stylesheets/card.css'
 
 function Card(props) {
     const theme = useContext(ThemeContext);
@@ -20,7 +21,7 @@ function Card(props) {
                     }
                 />
             </div>
-            <div className="card-back">
+            <div className="card-back clickable">
                 <img
                     alt=""
                     src={

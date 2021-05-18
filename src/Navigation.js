@@ -1,5 +1,6 @@
 import React, { useState, useContext, useCallback } from 'react';
 import { ThemeContext } from './ThemeContext';
+import './stylesheets/navigation.css'
 
 // Top navigation menu.
 function Navigation(props) {
@@ -16,9 +17,9 @@ function Navigation(props) {
         <>
             <nav className="nav" style={{ backgroundColor: theme.menuColor }}>
                 <ul>
-                    <li onClick={() => { props.setActiveScreen("start") }}>
+                    <li onClick={() => props.setActiveScreen("start")}>
                         Home
-                </li>
+                    </li>
                     <li className="theme-select">
                         <label>Select a theme: </label>
                         <select value={themeSelect} onChange={handleThemeSelectChange}>
@@ -26,7 +27,7 @@ function Navigation(props) {
                             <option value="vice">Miami Vice</option>
                             {props.themes.online
                                 ? <option value="online">Pixel</option>
-                                : <option disabled={true} style={{fontStyle: "italic"}}>Unavailable</option>
+                                : <option disabled={true} style={{ fontStyle: "italic" }}>Unavailable</option>
                             }
                         </select>
                     </li>

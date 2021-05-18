@@ -15,27 +15,16 @@ function useGameServer() {
     const [users, setUsers] = useState([]);
 
     // Array of the latest messages received from other users.
-    const [gameEvent, setGameEvent] = useState(null);
+    const [eventMessage, setEventMessage] = useState(null);
 
     const [chatMessages, setChatMessages] = useState([]);
 
-    const sendMessage = useCallback((type, receiver, content) => {
-        // Ensures own chat messages show in messages array.
-        if (type === "Chat") {
-            setChatMessages(prevState => {
-                let newState = [...prevState];
-                newState.push("Me: " + content);
+    const sendMessage = useCallback((receiver, content) => {
+        connection.invoke("Message", receiver, JSON.stringify(content));
 
-                if (newState.length > 10) {
-                    newState.shift();
-                }
-
-                return newState;
-            });
-        }
-
-        let msgObject = { type, content };
-        connection.invoke("Message", receiver, JSON.stringify(msgObject));
+        // DEBUG
+        console.log("Sent the following message to " + receiver + ":");
+        console.log(content);
     }, [connection]);
 
     // Subscribes to server events with callbacks to handle them.
@@ -46,6 +35,7 @@ function useGameServer() {
             setUsers(users);
         });
 
+        // Handles a new user connecting.
         connection.on("UserConnected", user => {
             setUsers(prevState => {
                 let newState = [...prevState];
@@ -66,6 +56,7 @@ function useGameServer() {
             });
         });
 
+        // Handles a user disconencting.
         connection.on("UserDisconnected", user => {
             setUsers(prevState => {
                 let newState = [...prevState];
@@ -87,14 +78,20 @@ function useGameServer() {
             });
         });
 
-        connection.on("Message", (sender, msg) => {
+        // Handles receiving a message from a user.
+        connection.on("Message", (sender, content) => {
 
-            let msgObject= JSON.parse(msg);
+            let contentObj = JSON.parse(content);
 
-            if (msgObject.type === "Chat") {
+            // DEBUG
+            console.log("Received the following message from " + sender);
+            console.log(contentObj);
+
+            // Store chat messages separately, otherwise set the eventMessage state.
+            if (contentObj.type === "Chat") {
                 setChatMessages(prevState => {
                     let newState = [...prevState];
-                    newState.push(sender + ": " + msgObject.content);
+                    newState.push(sender + ": " + contentObj.message);
 
                     if (newState.length > 10) {
                         newState.shift();
@@ -103,12 +100,12 @@ function useGameServer() {
                     return newState;
                 });
             }
-
-            if (msgObject.type === "GameEvent") {
-                setGameEvent({sender, ...msgObject});
+            else {
+                setEventMessage({ sender, ...contentObj });
             }
         });
 
+        // Starts the connection to server.
         connection.start()
             .then(() => console.log("Connected to server!"))
             .catch(error => console.log(error));
@@ -123,8 +120,7 @@ function useGameServer() {
         }
     }, [connection]);
 
-    // return { server, users, messages };
-    return { users, chatMessages, gameEvent, sendMessage };
+    return { users, chatMessages, setChatMessages, eventMessage, setEventMessage, sendMessage };
 }
 
 export default useGameServer;

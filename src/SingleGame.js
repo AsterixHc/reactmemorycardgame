@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useCallback } from "react"
-import useRandomizedDeck from "./useRandomizedDeck"
-import useCountdown from "./useCountdown"
+import './stylesheets/game.css'
+import useRandomizedDeck from "./customhooks/useRandomizedDeck"
+import useCountdown from "./customhooks/useCountdown"
 import Sidebar from "./Sidebar"
 import CardContainer from "./CardContainer"
 
 function SingleGame(props) {
     // A deck of card pairs, size specified by props.
-    const { deck, setDeck } = useRandomizedDeck(props.numberCards);
+    const { deck, setDeck, get: getDeck } = useRandomizedDeck();
 
     // The cards that player has chosen to flip.
     const [chosenCards, setChosenCards] = useState({ first: null, second: null });
@@ -26,6 +27,8 @@ function SingleGame(props) {
     // Handle game state: init
     useEffect(() => {
         if (gameState !== "init") return;
+
+        getDeck(props.numberCards);
 
         function flipAllCards() {
             setDeck(prevState => {
