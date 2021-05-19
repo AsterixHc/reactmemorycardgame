@@ -53,4 +53,16 @@ function ScoreScreen(props) {
     );
 }
 
+function SinglePlayerScore(props) {
+    return (
+        <></>
+    );
+}
+
+function MultiPlayerScore(props) {
+    return (
+        <></>
+    );
+}
+
 export default ScoreScreen;

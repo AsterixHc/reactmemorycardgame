@@ -1,36 +1,58 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import MultiGame from './MultiGame';
 import Lobby from './Lobby';
 import { ServerContext } from './ServerContext';
 import useGameServer from './customhooks/useGameServer';
 import useRandomizedDeck from './customhooks/useRandomizedDeck';
+import ScoreScreen from './ScoreScreen';
 
 function Multiplayer(props) {
     const server = useGameServer();
-    const [multiplayerState, setMultiplayerState] = useState("idle"); // Possible states of multiplay: idle, await, invited, playing, show-score
-    const [activeMatch, setActiveMatch] = useState(null); // {opponent: string, firstMove: bool}
-    const {deck, setDeck, get: getDeck} = useRandomizedDeck();
+
+    // Possible states of multiplay: lobby, playing, showing-score
+    const [multiplayerState, setMultiplayerState] = useState("lobby");
+
+    // The currently active match. Format: { opponent: string, numberCards: int, firstMove: bool }
+    const [activeMatch, setActiveMatch] = useState(null);
+
+    // Custom hook offering functionality for randomizing a deck of cards.
+    const { deck, setDeck, getNewDeck } = useRandomizedDeck(0);
+
+    const [endGameStats, setEndGameStats] = useState({ myGameStats: {}, opponentGameStats: {} });
+
+    const endGameCallback = useCallback((myGameStats, opponentGameStats) => {
+        let { score, lives, timer } = myGameStats;
+        let { opponentScore, opponentLives, opponentTimer } = opponentGameStats;
+
+        setEndGameStats({ myGameStats, opponentGameStats });
+
+        setMultiplayerState("showing-score");
+    }, []);
 
     return (
         <div className="multiplayer">
             <ServerContext.Provider value={server}>
-                {multiplayerState !== "playing"
-                    ? <Lobby
-                        multiplayerState={multiplayerState}
-                        setMultiplayerState={setMultiplayerState}
-                        setActiveMatch={setActiveMatch}
-                        deck={deck}
-                        getDeck={getDeck}
-                        setDeck={setDeck}
-                    />
-                    : <MultiGame
-                        setMultiplayerState={setMultiplayerState} // May not need this - Lobby->MutiGame->Lobby etc. (do something else with score screen)
-                        opponent={activeMatch.opponent}
-                        deck={deck}
-                        setDeck={setDeck}
-                        firstMove={activeMatch.firstMove}
-                    />
-                }
+                {multiplayerState === "lobby" && <Lobby
+                    multiplayerState={multiplayerState}
+                    setMultiplayerState={setMultiplayerState}
+                    setActiveMatch={setActiveMatch}
+                    deck={deck}
+                    setDeck={setDeck}
+                    getNewDeck={getNewDeck}
+                />}
+
+                {multiplayerState === "playing" && <MultiGame
+                    setMultiplayerState={setMultiplayerState}
+                    opponent={activeMatch.opponent}
+                    deck={deck}
+                    setDeck={setDeck}
+                    firstMove={activeMatch.firstMove}
+                    endGameCallback={endGameCallback}
+                />}
+
+                {multiplayerState === "showing-score" && <ScoreScreen 
+                    endGameStats={endGameStats}
+                />}
             </ServerContext.Provider>
         </div>
     );

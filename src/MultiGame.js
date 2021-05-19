@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useCallback, useContext } from "react"
-import useRandomizedDeck from "./customhooks/useRandomizedDeck"
 import useCountdown from "./customhooks/useCountdown"
 import Sidebar from "./Sidebar"
 import CardContainer from "./CardContainer"
@@ -8,9 +7,9 @@ import { ServerContext } from "./ServerContext"
 
 function MultiGame(props) {
     const server = useContext(ServerContext);
-
-    // A deck of card pairs, size specified by props.
-    const { deck, setDeck } = useRandomizedDeck();
+    
+    // Destructured props.
+    const { setMultiplayerState, opponent, deck, setDeck, firstMove, endGameCallback } = props;
 
     // The cards that player has chosen to flip.
     const [chosenCards, setChosenCards] = useState({ first: null, second: null });
@@ -25,13 +24,11 @@ function MultiGame(props) {
     const [lives, setLives] = useState(5);
 
     // A coundown providing the remaining time.
-    const { timer, setRunning: setTimerRunning } = useCountdown((500 * props.numberCards), false, () => { setGameState("game-over") });
+    const { timer, setRunning: setTimerRunning } = useCountdown((5000 * 10), false, () => { setGameState("game-over") }); // TOOD: Rectify this - used to be 5 * props.numberCards
 
     // Handle game state: init
     useEffect(() => {
         if (gameState !== "init") return;
-
-        console.log(props.deck);
 
         function flipAllCards() {
             setDeck(prevState => {
@@ -52,14 +49,14 @@ function MultiGame(props) {
 
             timeout = setTimeout(() => {
                 flipAllCards();
-                setTimerRunning(true);
-                setGameState(props.firstMove ? "await-card-1" : "opponent-turn");
+                setTimerRunning(firstMove);
+                setGameState(firstMove ? "await-card-1" : "opponent-turn");
             }, 1500);
         }, 500);
 
         return () => clearTimeout(timeout);
 
-    }, [gameState, setDeck, setTimerRunning, props]);
+    }, [gameState, setTimerRunning, firstMove, setDeck]);
 
     // Handle game state: process-choice
     useEffect(() => {
@@ -88,6 +85,8 @@ function MultiGame(props) {
                 first.flipped = !first.flipped;
                 second.flipped = !second.flipped;
 
+                // Send to opponent: flip cards back.
+
                 // Detract 1 life.
                 let prevLives;
                 setLives(prevState => {
@@ -103,28 +102,109 @@ function MultiGame(props) {
             }
 
             setChosenCards({ first: null, second: null });
+            server.sendMessage(opponent, {type: "EndTurn"});
+            setTimerRunning(false);
             setGameState("opponent-turn");
 
         }, 1000);
 
         return () => clearTimeout(timeout);
 
-    }, [gameState, chosenCards, deck, lives]);
+    }, [gameState, chosenCards, lives, deck, server, opponent, setTimerRunning]);
 
     // Handle game state: opponent-turn
     useEffect(() => {
         if (gameState !== "opponent-turn") return;
-    }, [gameState]);
+        if (!server.eventMessage) return;
+
+        let event = server.eventMessage;
+
+        switch (event.type) {
+            case "CardFlip":
+                let card = deck.find(card => card.id === event.cardId);
+                card.flipped = !card.flipped;
+
+                let first = chosenCards.first;
+                let second = chosenCards.second;
+
+                if (!first) {
+                    first = card;
+                }
+                else {
+                    second = card;
+                }
+
+                setChosenCards(prevState => {
+                    let newState = { ...prevState };
+                    newState.first = first;
+                    newState.second = second;
+
+                    return newState;
+                });
+
+                // Check match.
+                if (first && second) {
+                    setTimeout(() => {
+
+                        if (first.sourceId === second.sourceId) { // Match.
+                            first.hidden = true;
+                            second.hidden = true;
+                        }
+                        else { // No match.
+                            first.flipped = !first.flipped;
+                            second.flipped = !second.flipped;
+                        }
+                    }, 1000);
+
+                    setChosenCards({first: null, second: null});
+                }
+
+                server.setEventMessage(null);
+                break;
+
+            case "EndTurn":
+                setTimerRunning(true);
+                setGameState("await-card-1");
+                server.setEventMessage(null);
+
+            break;
+
+            case "GameOver":
+
+                
+
+                // TODO: Show score screen etc.
+
+                server.setEventMessage(null);
+                break;
+        
+            default:
+                break;
+        }
+
+    }, [gameState, server, deck, chosenCards, setTimerRunning]);
 
     // Handle game state: game-over
     useEffect(() => {
         if (gameState !== "game-over") return;
 
         setTimerRunning(false);
-        // TODO: Show score etc.
-        props.setMultiplayerState("show-score");
+        server.sendMessage(opponent, {type: "GameOver", score, lives, timer});
 
-    }, [gameState, setTimerRunning, props, score, lives, timer]);
+        if (server.eventMessage) {
+            let event = server.eventMessage;
+
+            let myGameStats = {score, lives, timer};
+            let opponentGameStats = {score: event.score, lives: event.lives, timer: event.timer};
+
+            endGameCallback(myGameStats, opponentGameStats);
+            setMultiplayerState("show-score");
+        }
+
+        
+        // TODO: Show score etc.
+
+    }, [gameState, setTimerRunning, setMultiplayerState, score, lives, timer, server, opponent, endGameCallback]);
 
     // Callback to handle card click.
     const handleCardClick = useCallback(id => {
@@ -135,6 +215,9 @@ function MultiGame(props) {
 
         // Flip card.
         card.flipped = !card.flipped;
+
+        // Send card id to opponent.
+        server.sendMessage(opponent, {type: "CardFlip", cardId: id});
 
         // Set card as chosen, update game state.
         setChosenCards(prevState => {
@@ -152,7 +235,7 @@ function MultiGame(props) {
             return newState;
         });
 
-    }, [gameState, chosenCards, deck])
+    }, [gameState, chosenCards, deck, opponent, server])
 
     return (
         <div className="game multiplayer">
@@ -164,7 +247,7 @@ function MultiGame(props) {
                     onClick={() => { setGameState("await-card-1") }}>
                     gib turn pls
                 </button> */}
-                <ChatWindow opponent={props.opponent}/>
+                <ChatWindow opponent={opponent}/>
             </div>
         </div>
     )

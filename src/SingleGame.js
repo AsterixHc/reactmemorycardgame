@@ -7,7 +7,7 @@ import CardContainer from "./CardContainer"
 
 function SingleGame(props) {
     // A deck of card pairs, size specified by props.
-    const { deck, setDeck, get: getDeck } = useRandomizedDeck();
+    const { deck, setDeck, shuffleDeck } = useRandomizedDeck(props.numberCards);
 
     // The cards that player has chosen to flip.
     const [chosenCards, setChosenCards] = useState({ first: null, second: null });
@@ -28,7 +28,7 @@ function SingleGame(props) {
     useEffect(() => {
         if (gameState !== "init") return;
 
-        getDeck(props.numberCards);
+        shuffleDeck();
 
         function flipAllCards() {
             setDeck(prevState => {
@@ -56,7 +56,7 @@ function SingleGame(props) {
 
         return () => clearTimeout(timeout);
 
-    }, [gameState, setDeck, setTimerRunning]);
+    }, [gameState, setDeck, shuffleDeck, setTimerRunning]);
 
     // Handle game state: process-choice
     useEffect(() => {

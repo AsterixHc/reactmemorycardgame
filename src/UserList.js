@@ -6,26 +6,30 @@ import './stylesheets/userlist.css';
 function UserList(props) {
     const theme = useContext(ThemeContext);
     const server = useContext(ServerContext);
+
+    // The user currently being selected.
     const [selectedUser, setSelectedUser] = useState("");
 
+    // Selects a user from the user list.
     const handleSelectUser = useCallback(user => {
         setSelectedUser(selectedUser === user ? "" : user);
     }, [selectedUser]);
 
+    // Invites another user to play a game.
     const handleInviteUser = useCallback(numberCards => {
         props.handleInviteUser(selectedUser, numberCards);
     }, [selectedUser, props]);
 
     // Reset selection when returning to idle state.
     useEffect(() => {
-        if (props.multiplayerState === "idle") {
+        if (props.lobbyState === "idle") {
             setSelectedUser("");
         }
-    }, [props.multiplayerState]);
+    }, [props.lobbyState]);
 
     // Gets the appropriate user list item, depending on the state.
     function getUserListItem(user) {
-        switch (props.multiplayerState) {
+        switch (props.lobbyState) {
             case "idle":
                 return <IdleUserListItem
                     user={user}

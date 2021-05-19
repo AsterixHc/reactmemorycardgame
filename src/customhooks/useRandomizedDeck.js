@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
-function useRandomizedDeck() {
+function useRandomizedDeck(numberCards) {
     const [deck, setDeck] = useState([]);
 
-    function get(numberCards) {
+    // Returns a randomized deck of card pairs.
+    const getNewDeck = useCallback(numberCards => {
         let sourceIds = [];
     
             for (let i = 0; i < 52 ; i++) {
@@ -22,12 +23,15 @@ function useRandomizedDeck() {
     
             selection = shuffleArray(selection);
     
-            setDeck(selection);
-
             return selection;
-    }
+    }, [])
 
-    return {deck, setDeck, get};
+    // Sets the deck state to a new randomized deck once.
+    useEffect(() => {
+        setDeck(getNewDeck(numberCards));
+    }, [getNewDeck, numberCards]);
+
+    return {deck, setDeck, getNewDeck};
 }
 
 // Shuffle algorithm credit: https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
