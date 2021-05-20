@@ -7,7 +7,7 @@ import CardContainer from "./CardContainer"
 
 function SingleGame(props) {
     // A deck of card pairs, size specified by props.
-    const { deck, setDeck, shuffleDeck } = useRandomizedDeck(props.numberCards);
+    const { deck, setDeck } = useRandomizedDeck(props.numberCards);
 
     // The cards that player has chosen to flip.
     const [chosenCards, setChosenCards] = useState({ first: null, second: null });
@@ -27,8 +27,6 @@ function SingleGame(props) {
     // Handle game state: init
     useEffect(() => {
         if (gameState !== "init") return;
-
-        shuffleDeck();
 
         function flipAllCards() {
             setDeck(prevState => {
@@ -51,12 +49,13 @@ function SingleGame(props) {
                 flipAllCards();
                 setTimerRunning(true);
                 setGameState("await-card-1");
+                clearTimeout(timeout);
             }, 1500);
         }, 500);
 
         return () => clearTimeout(timeout);
 
-    }, [gameState, setDeck, shuffleDeck, setTimerRunning]);
+    }, [gameState, setDeck, setTimerRunning]);
 
     // Handle game state: process-choice
     useEffect(() => {
@@ -113,7 +112,7 @@ function SingleGame(props) {
         if (gameState !== "game-over") return;
 
         setTimerRunning(false);
-        props.onGameEnd(score, lives, timer);
+        props.onGameEnd({score, lives, timer});
         props.setActiveScreen("score");
 
     }, [gameState, setTimerRunning, props, score, lives, timer]);

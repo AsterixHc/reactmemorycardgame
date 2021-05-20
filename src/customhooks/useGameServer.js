@@ -21,10 +21,6 @@ function useGameServer() {
 
     const sendMessage = useCallback((receiver, content) => {
         connection.invoke("Message", receiver, JSON.stringify(content));
-
-        // DEBUG
-        console.log("Sent the following message to " + receiver + ":");
-        console.log(content);
     }, [connection]);
 
     // Subscribes to server events with callbacks to handle them.
@@ -82,10 +78,6 @@ function useGameServer() {
         connection.on("Message", (sender, content) => {
 
             let contentObj = JSON.parse(content);
-
-            // DEBUG
-            console.log("Received the following message from " + sender);
-            console.log(contentObj);
 
             // Store chat messages separately, otherwise set the eventMessage state.
             if (contentObj.type === "Chat") {

@@ -53,7 +53,7 @@ function App(props) {
     const [numberCards, setNumberCards] = useState(10);
 
     // Relevant stats from a finished game to be passed on to score screen.
-    const [gameStats, setGameStats] = useState({ score: 0, lives: 0, timer: 0 });
+    const [endGameStats, setEndGameStats] = useState(null);
 
     // Sets the background of entire app, using evil html.
     useEffect(() => {
@@ -61,8 +61,8 @@ function App(props) {
     }, [activeTheme]);
 
     // Callback that sets the game stats when a game finishes.
-    const onGameEndCallback = useCallback((score, lives, timer) => {
-        setGameStats({ score, lives, timer });
+    const onGameEndCallback = useCallback(playerStats => {
+        setEndGameStats({playerStats});
     }, []);
 
     // Callback that sets the currently active theme.
@@ -100,8 +100,8 @@ function App(props) {
                 <Navigation selectThemeCallback={selectThemeCallback} setActiveScreen={setActiveScreen} themes={themes}/>
                 {activeScreen === "start" && <StartScreen setActiveScreen={setActiveScreen} setNumberCards={setNumberCards} />}
                 {activeScreen === "single" && <SingleGame setActiveScreen={setActiveScreen} onGameEnd={onGameEndCallback} numberCards={numberCards} />}
-                {activeScreen === "multi" && <Multiplayer setActiveScreen={setActiveScreen} onGameEnd={onGameEndCallback} numberCards={numberCards} />}
-                {activeScreen === "score" && <ScoreScreen score={gameStats.score} lives={gameStats.lives} timeRemaining={gameStats.timer} />}
+                {activeScreen === "multi" && <Multiplayer />}
+                {activeScreen === "score" && <ScoreScreen endGameStats={endGameStats} />}
             </ThemeContext.Provider>
         </div>
     )

@@ -108,7 +108,7 @@ function useOnlineTheme() {
             backgroundBoxColor: colorCodes.cssBackgroundBoxColor,
             buttonTextColor: colorCodes.cssFooterTextColor,
             textShadow: "2px 2px 4px rgba(0, 0, 0, 0.8)",
-            cardSource: imageLocations // TODO: Ask if this is bad practice ("reusing" cardSource property for our array)
+            cardSource: imageLocations
         });
 
     }, [colorCodes, imageLocations]);

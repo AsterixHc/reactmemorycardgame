@@ -1,10 +1,11 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import MultiGame from './MultiGame';
 import Lobby from './Lobby';
 import { ServerContext } from './ServerContext';
 import useGameServer from './customhooks/useGameServer';
 import useRandomizedDeck from './customhooks/useRandomizedDeck';
 import ScoreScreen from './ScoreScreen';
+import './stylesheets/multiplayer.css'
 
 function Multiplayer(props) {
     const server = useGameServer();
@@ -18,14 +19,11 @@ function Multiplayer(props) {
     // Custom hook offering functionality for randomizing a deck of cards.
     const { deck, setDeck, getNewDeck } = useRandomizedDeck(0);
 
-    const [endGameStats, setEndGameStats] = useState({ myGameStats: {}, opponentGameStats: {} });
+    // Stats from both players at the end of a multiplayer game. { playerStats: { score, lives, timer }, opponentStats: { score, lives, timer } }
+    const [endGameStats, setEndGameStats] = useState(null);
 
-    const endGameCallback = useCallback((myGameStats, opponentGameStats) => {
-        let { score, lives, timer } = myGameStats;
-        let { opponentScore, opponentLives, opponentTimer } = opponentGameStats;
-
-        setEndGameStats({ myGameStats, opponentGameStats });
-
+    const onGameEndCallback = useCallback((playerStats, opponentStats) => {
+        setEndGameStats({ playerStats, opponentStats });
         setMultiplayerState("showing-score");
     }, []);
 
@@ -42,12 +40,13 @@ function Multiplayer(props) {
                 />}
 
                 {multiplayerState === "playing" && <MultiGame
-                    setMultiplayerState={setMultiplayerState}
                     opponent={activeMatch.opponent}
+                    numberCards={activeMatch.numberCards}
                     deck={deck}
                     setDeck={setDeck}
                     firstMove={activeMatch.firstMove}
-                    endGameCallback={endGameCallback}
+                    onGameEnd={onGameEndCallback}
+                    setMultiplayerState={setMultiplayerState}
                 />}
 
                 {multiplayerState === "showing-score" && <ScoreScreen 
