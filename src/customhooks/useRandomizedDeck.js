@@ -26,7 +26,7 @@ function useRandomizedDeck(numberCards) {
             return selection;
     }, [])
 
-    // Sets the deck state to a new randomized deck once.
+    // Sets the deck state to a new randomized deck when the hook is used with a numberCards parameter.
     useEffect(() => {
         setDeck(getNewDeck(numberCards));
     }, [getNewDeck, numberCards]);

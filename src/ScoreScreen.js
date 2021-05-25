@@ -7,25 +7,32 @@ function ScoreScreen(props) {
     const playerStats = props.endGameStats.playerStats;
     const opponentStats = props.endGameStats.opponentStats;
 
-    return(
+    return (
         <>
-            <div className="multiplayer-verdict" style={{ backgroundColor: theme.backgroundBoxColor }}>
-                {opponentStats && <MultiplayerVerdict playerStats={playerStats} opponentStats={opponentStats}/>}
-            </div>
+            {opponentStats && <div
+                className="multiplayer-verdict"
+                style={{ backgroundColor: theme.backgroundBoxColor }}>
+                <MultiplayerVerdict playerStats={playerStats} opponentStats={opponentStats} />
+            </div>}
             <div className="score-components">
-                <Score stats={playerStats} multiplayer={opponentStats !== undefined}/>
-                {opponentStats && <Score stats={opponentStats} multiplayer={true}/>}
+                <Score stats={playerStats} multiplayer={opponentStats !== undefined} />
+                {opponentStats && <Score stats={opponentStats} multiplayer={true} />}
+            </div>
+            <div className="score-buttons">
+                <button
+                    onClick={() => props.onClickExit()}
+                    style={{ backgroundColor: theme.buttonColor, color: theme.buttonTextColor, textShadow: theme.textShadow }}>
+                    Exit Score Screen
+            </button>
             </div>
         </>
     );
 }
 
+// Component that breaks down stats of a player, and provides a total score.
 function Score(props) {
+    const { stats, multiplayer } = props;
     const theme = useContext(ThemeContext);
-
-    const {stats, multiplayer} = props;
-
-    console.log(stats);
 
     let gameOverMessage;
 
@@ -74,10 +81,12 @@ function Score(props) {
     );
 }
 
+// Component that informs player of the winner after a multiplayer match.
 function MultiplayerVerdict(props) {
-    const {playerStats, opponentStats} = props;
+    const { playerStats, opponentStats } = props;
     const [winner, setWinner] = useState("");
 
+    // Determines which player won, by calculating score totals.
     useEffect(() => {
         const playerRaw = (playerStats.timer * 10) + playerStats.score;
         const playerTotal = playerRaw + (playerStats.lives * playerRaw);
@@ -115,6 +124,7 @@ function MultiplayerVerdict(props) {
         });
 
     }, [playerStats, opponentStats]);
+
     return (
         <>
             <h1>{winner} won!</h1>

@@ -9,7 +9,6 @@ import useOnlineTheme from "./customhooks/useOnlineTheme"
 import Multiplayer from "./Multiplayer"
 
 function App(props) {
-    // Theme object fethed from API.
     const onlineTheme = useOnlineTheme();
 
     // All available themes.
@@ -43,29 +42,28 @@ function App(props) {
         );
     }, [onlineTheme]);
 
-    // The theme that is currently active.
     const [activeTheme, setActiveTheme] = useState(themes.default);
-
-    // The screen that is currently being rendered.
-    const [activeScreen, setActiveScreen] = useState("start");
-
-    // The number of cards being dealt when starting a game (variable from start screen).
+    const [activeScreen, setActiveScreen] = useState("start"); // Screens: start, single, multi, score
     const [numberCards, setNumberCards] = useState(10);
-
-    // Relevant stats from a finished game to be passed on to score screen.
-    const [endGameStats, setEndGameStats] = useState(null);
+    const [endGameStats, setEndGameStats] = useState(null);  // Format: { playerStats: { score, lives, timer } }
 
     // Sets the background of entire app, using evil html.
     useEffect(() => {
         document.body.style.backgroundColor = activeTheme.backgroundColor;
     }, [activeTheme]);
 
-    // Callback that sets the game stats when a game finishes.
+    // Called by SingleGame component when the game ends.
     const onGameEndCallback = useCallback(playerStats => {
         setEndGameStats({playerStats});
+        setActiveScreen("score");
     }, []);
 
-    // Callback that sets the currently active theme.
+    // Called by ScoreScreen when exit button is clicked.
+    const onClickExit = useCallback(() => {
+        setActiveScreen("start");
+    }, []);
+
+    // Called by Navigation component to set the current theme.
     const selectThemeCallback = useCallback(themeName => {
         if (activeTheme.name === themeName) return;
 
@@ -99,9 +97,9 @@ function App(props) {
             <ThemeContext.Provider value={activeTheme}>
                 <Navigation selectThemeCallback={selectThemeCallback} setActiveScreen={setActiveScreen} themes={themes}/>
                 {activeScreen === "start" && <StartScreen setActiveScreen={setActiveScreen} setNumberCards={setNumberCards} />}
-                {activeScreen === "single" && <SingleGame setActiveScreen={setActiveScreen} onGameEnd={onGameEndCallback} numberCards={numberCards} />}
+                {activeScreen === "single" && <SingleGame onGameEnd={onGameEndCallback} numberCards={numberCards} />}
                 {activeScreen === "multi" && <Multiplayer />}
-                {activeScreen === "score" && <ScoreScreen endGameStats={endGameStats} />}
+                {activeScreen === "score" && <ScoreScreen endGameStats={endGameStats} onClickExit={onClickExit}/>}
             </ThemeContext.Provider>
         </div>
     )

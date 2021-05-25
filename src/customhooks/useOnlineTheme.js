@@ -1,16 +1,9 @@
 import { useEffect, useState } from "react";
 
 function useOnlineTheme() {
-    // Token used for accessing the themes API.
     const [accessToken, setAccessToken] = useState(null);
-
-    // An object containing the color codes fethed from API.
     const [colorCodes, setColorCodes] = useState(null);
-
-    // An array of URL image locations fetched from API.
     const [imageLocations, setImageLocations] = useState(null);
-
-    // The theme object returned by this custom hook.
     const [theme, setTheme] = useState(null);
 
     // Fetches the bearer token for API access.

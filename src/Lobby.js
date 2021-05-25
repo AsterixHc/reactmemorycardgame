@@ -6,11 +6,8 @@ import './stylesheets/lobby.css';
 
 function Lobby(props) {
     const server = useContext(ServerContext);
-
-    const [lobbyState, setLobbyState] = useState("idle");
-
-    // An invitation to play a game. Format: {opponent: string, numberCards: integer }
-    const [invitation, setInvitation] = useState(null);
+    const [lobbyState, setLobbyState] = useState("idle"); // States: idle, await, invited
+    const [invitation, setInvitation] = useState(null); // Format: {opponent: string, numberCards: integer }
 
     // Invites another user to play a game.
     const handleInviteUser = useCallback((user, numberCards) => {
@@ -68,8 +65,12 @@ function Lobby(props) {
 
             case "Response":
                 if (event.accepted) {
-                    let firstMove = (Math.random() > 0.5);
+                    // "Throw dice" for who gets the first move.
+                    let firstMove = (Math.random() < 0.5);
+
+                    // Randomize the deck that will be used in the match.
                     let deck = props.getNewDeck(invitation.numberCards);
+
                     server.sendMessage(invitation.opponent, { type: "Game", firstMove: !firstMove, deck });
                     props.setActiveMatch({ 
                         opponent: invitation.opponent,
@@ -80,6 +81,7 @@ function Lobby(props) {
                     props.setMultiplayerState("playing");
                 }
                 else {
+                    server.pushLocalMessage("Server", event.sender + " declined your invitation.");
                     setLobbyState("idle");
                     setInvitation(null);
                 }
@@ -88,7 +90,7 @@ function Lobby(props) {
                 break;
 
             case "Abort":
-                console.log("Invitation was aborted by remote user with the reason: " + event.reason); // TODO: Inform user some other way(?)
+                server.pushLocalMessage("Server", event.sender + " is busy.");
                 setLobbyState("idle");
                 setInvitation(null);
                 server.setEventMessage(null);
@@ -123,7 +125,7 @@ function Lobby(props) {
                 break;
 
             case "Abort":
-                console.log("Invitation was aborted by remote user with the reason: " + event.reason); // TODO: Inform user some other way(?)
+                server.pushLocalMessage("Server", event.sender + " cancelled their invitation.");
                 setLobbyState("idle");
                 setInvitation(null);
                 server.setEventMessage(null);
@@ -141,11 +143,10 @@ function Lobby(props) {
 
         let remoteUser = server.users.find(user => user === invitation.opponent);
         if (!remoteUser) {
-            console.log("Returning: Remote user disconnected from the server."); // TODO: Inform user some other way(?)
             setInvitation(null);
             setLobbyState("idle");
         }
-    }, [invitation, server.users, props]);
+    }, [invitation, server.users]);
 
     return (
         <div className="lobby">

@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 function useCountdown(seconds, runOnMount, onTimerZero) {
     const [timer, setTimer] = useState(seconds);
     const [running, setRunning] = useState(runOnMount);
-
+    
     useEffect(() => {
         let interval;
 
@@ -26,12 +26,12 @@ function useCountdown(seconds, runOnMount, onTimerZero) {
 
     }, [running, onTimerZero]);
 
-    // Resets the countdown timer to initial props value.
+    // Resets the countdown timer to initial seconds value.
     const reset = useCallback(() => {
         setRunning(false);
         setTimer(seconds);
         setRunning(true);
-    }, [seconds, setRunning]);
+    }, [seconds]);
 
     return { timer, running, setRunning, reset };
 }

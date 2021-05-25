@@ -3,7 +3,6 @@ import Timer from './Timer';
 import { ThemeContext } from './ThemeContext';
 import './stylesheets/sidebar.css'
 
-// Holds everything that shows in game's sidebar.
 function Sidebar(props) {
     const theme = useContext(ThemeContext);
 

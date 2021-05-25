@@ -1,27 +1,36 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { HubConnectionBuilder } from '@microsoft/signalr';
 
-function useGameServer() {
-    // Creates the server object.
+function useGameServer(serverURL, numberStoredMessages) {
+    // Creates the connection.
     const connection = useMemo(() => {
         return (
             new HubConnectionBuilder()
-                .withUrl("http://jats.web.eadania.dk/proxyhub")
+                .withUrl(serverURL)
                 .build()
         );
-    }, []);
+    }, [serverURL]);
 
-    // All users currently connected to the server.
     const [users, setUsers] = useState([]);
-
-    // Array of the latest messages received from other users.
     const [eventMessage, setEventMessage] = useState(null);
-
     const [chatMessages, setChatMessages] = useState([]);
 
     const sendMessage = useCallback((receiver, content) => {
         connection.invoke("Message", receiver, JSON.stringify(content));
     }, [connection]);
+
+    const pushLocalMessage = useCallback((sender, message) => {
+        setChatMessages(prevState => {
+            let newState = [...prevState];
+            newState.push({sender, message});
+
+            if (newState.length > numberStoredMessages) {
+                newState.shift();
+            }
+
+            return newState;
+        });
+    }, [numberStoredMessages]);
 
     // Subscribes to server events with callbacks to handle them.
     useEffect(() => {
@@ -42,9 +51,9 @@ function useGameServer() {
 
             setChatMessages(prevState => {
                 let newState = [...prevState];
-                newState.push(user + " connected!");
+                newState.push({sender: "Server", message: (user + " connected!")});
 
-                if (newState.length > 10) {
+                if (newState.length > numberStoredMessages) {
                     newState.shift();
                 }
 
@@ -52,7 +61,7 @@ function useGameServer() {
             });
         });
 
-        // Handles a user disconencting.
+        // Handles a user disconnecting.
         connection.on("UserDisconnected", user => {
             setUsers(prevState => {
                 let newState = [...prevState];
@@ -64,9 +73,9 @@ function useGameServer() {
 
             setChatMessages(prevState => {
                 let newState = [...prevState];
-                newState.push(user + " disconnected!");
+                newState.push({sender: "Server", message: (user + " disconnected!")});
 
-                if (newState.length > 10) {
+                if (newState.length > numberStoredMessages) {
                     newState.shift();
                 }
 
@@ -79,13 +88,12 @@ function useGameServer() {
 
             let contentObj = JSON.parse(content);
 
-            // Store chat messages separately, otherwise set the eventMessage state.
             if (contentObj.type === "Chat") {
                 setChatMessages(prevState => {
                     let newState = [...prevState];
-                    newState.push(sender + ": " + contentObj.message);
+                    newState.push({sender, message: contentObj.message});
 
-                    if (newState.length > 10) {
+                    if (newState.length > numberStoredMessages) {
                         newState.shift();
                     }
 
@@ -110,9 +118,9 @@ function useGameServer() {
             connection.stop()
                 .then(() => console.log("Disconnected from server."));
         }
-    }, [connection]);
+    }, [connection, numberStoredMessages]);
 
-    return { users, chatMessages, setChatMessages, eventMessage, setEventMessage, sendMessage };
+    return { users, chatMessages, setChatMessages, eventMessage, setEventMessage, sendMessage, pushLocalMessage };
 }
 
 export default useGameServer;

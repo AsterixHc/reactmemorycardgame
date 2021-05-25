@@ -4,30 +4,18 @@ import Sidebar from "./Sidebar"
 import CardContainer from "./CardContainer"
 import ChatWindow from "./ChatWindow"
 import { ServerContext } from "./ServerContext"
+import TimedPopup from "./TimedPopup"
 
 function MultiGame(props) {
+    const { opponent, numberCards, deck, setDeck, firstMove, onGameEnd, onError } = props;
     const server = useContext(ServerContext);
-
-    // Destructured props.
-    const { opponent, numberCards, deck, setDeck, firstMove, onGameEnd, setMultiplayerState } = props;
-
-    // The cards that player has chosen to flip.
     const [chosenCards, setChosenCards] = useState({ first: null, second: null });
-
-    // The current game state: init, await-card-1, await-card-2, process-choice, opponent-turn, game-over
-    const [gameState, setGameState] = useState("init");
-
-    // The current score from matching cards.
     const [score, setScore] = useState(0);
-
-    // The number of remaining lives.
     const [lives, setLives] = useState(5);
-
-    // End-game stats received from opponent player when the game ends.
-    const [opponentStats, setOpponentStats] = useState(null);
-
-    // A coundown providing the remaining time.
     const { timer, setRunning: setTimerRunning } = useCountdown((5 * numberCards), false, () => setGameState("game-over"));
+    const [opponentStats, setOpponentStats] = useState(null);
+    const [gameState, setGameState] = useState("init"); // States: init, await-card-1, await-card-2, process-choice, opponent-turn, game-over, await
+    const [showPopup, setShowPopup] = useState(false);
 
     // Handle game state: init
     useEffect(() => {
@@ -71,11 +59,9 @@ function MultiGame(props) {
 
         let timeout = setTimeout(() => {
             if (first.sourceId === second.sourceId) { // Match.
-                // Hide matched cards.
                 first.hidden = true;
                 second.hidden = true;
 
-                // Award points for mathcing.
                 setScore(prevState => prevState + 100);
 
                 // Handle win condition.
@@ -85,13 +71,9 @@ function MultiGame(props) {
                 }
             }
             else { // No match.
-                // Flip cards back.
                 first.flipped = !first.flipped;
                 second.flipped = !second.flipped;
 
-                // Send to opponent: flip cards back.
-
-                // Detract 1 life.
                 let prevLives;
                 setLives(prevState => {
                     prevLives = prevState;
@@ -190,8 +172,8 @@ function MultiGame(props) {
         if (gameState !== "game-over") return;
 
         setTimerRunning(false);
-        let playerStats = {score, lives, timer};
-        server.sendMessage(opponent, {type: "GameOver", stats: playerStats});
+        let playerStats = { score, lives, timer };
+        server.sendMessage(opponent, { type: "GameOver", stats: playerStats });
 
         if (opponentStats) {
             onGameEnd(playerStats, opponentStats);
@@ -202,7 +184,7 @@ function MultiGame(props) {
 
     }, [gameState, setTimerRunning, score, lives, timer, server, opponent, opponentStats, onGameEnd]);
 
-    // Handles game state: await
+    // Handle game state: await
     useEffect(() => {
         if (gameState !== "await") return;
         if (!server.eventMessage) return;
@@ -210,21 +192,21 @@ function MultiGame(props) {
         let event = server.eventMessage;
 
         if (event.type === "GameOver") {
-            let playerStats = {score, lives, timer};
+            let playerStats = { score, lives, timer };
             onGameEnd(playerStats, event.stats);
         }
 
         server.setEventMessage(null);
-    }, [gameState, server, onGameEnd,  score, lives, timer]);
+    }, [gameState, server, onGameEnd, score, lives, timer]);
 
+    // Handle opponent disconnect.
     useEffect(() => {
         let remoteUser = server.users.find(user => user === opponent);
 
         if (!remoteUser) {
-            console.log("Returning: Remote user disconnected from the server."); // TODO: Inform user some other way(?)
-            setMultiplayerState("lobby");
+            onError("Opponent disconnected");
         }
-    }, [server.users, opponent, setMultiplayerState]);
+    }, [server.users, opponent, onError]);
 
     // Callback to handle card click.
     const handleCardClick = useCallback(id => {
@@ -233,13 +215,9 @@ function MultiGame(props) {
 
         let card = deck.find(card => card.id === id);
 
-        // Flip card.
         card.flipped = !card.flipped;
-
-        // Send card id to opponent.
         server.sendMessage(opponent, { type: "CardFlip", cardId: id });
 
-        // Set card as chosen, update game state.
         setChosenCards(prevState => {
             let newState = { ...prevState };
 
@@ -258,13 +236,21 @@ function MultiGame(props) {
     }, [gameState, chosenCards, deck, opponent, server])
 
     return (
-        <div className="game multiplayer">
-            <CardContainer deck={deck} handleCardClick={handleCardClick} />
-            <div className="multi-side">
-                <Sidebar score={score} lives={lives} timeRemaining={timer} />
-                <ChatWindow opponent={opponent} />
+        <>
+            <div className="game multiplayer">
+                <CardContainer deck={deck} handleCardClick={handleCardClick} />
+                <div className="multi-side">
+                    <Sidebar score={score} lives={lives} timeRemaining={timer} />
+                    <ChatWindow opponent={opponent} />
+                </div>
             </div>
-        </div>
+            <TimedPopup
+                trigger={showPopup}
+                setTrigger={setShowPopup}
+                duration={2000}>
+                {gameState === "opponent-turn" ? "Your turn" : "Opponent's turn"}
+            </TimedPopup>
+        </>
     )
 }
 

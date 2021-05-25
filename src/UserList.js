@@ -6,6 +6,7 @@ import './stylesheets/userlist.css';
 function UserList(props) {
     const theme = useContext(ThemeContext);
     const server = useContext(ServerContext);
+    const buttonStyle = { backgroundColor: theme.buttonColor, color: theme.buttonTextColor, textShadow: theme.textShadow };
 
     // The user currently being selected.
     const [selectedUser, setSelectedUser] = useState("");
@@ -20,7 +21,7 @@ function UserList(props) {
         props.handleInviteUser(selectedUser, numberCards);
     }, [selectedUser, props]);
 
-    // Reset selection when returning to idle state.
+    // Resets selection when returning to idle state.
     useEffect(() => {
         if (props.lobbyState === "idle") {
             setSelectedUser("");
@@ -36,6 +37,7 @@ function UserList(props) {
                     isSelected={selectedUser === user}
                     handleSelectUser={handleSelectUser}
                     handleInviteUser={handleInviteUser}
+                    buttonStyle={buttonStyle}
                 />
 
             case "await":
@@ -43,6 +45,7 @@ function UserList(props) {
                     user={user}
                     isInvited={selectedUser === user}
                     handleCancelInvite={props.handleCancelInvite}
+                    buttonStyle={buttonStyle}
                 />
 
             case "invited":
@@ -52,6 +55,7 @@ function UserList(props) {
                     numberCards={props.invitation.numberCards}
                     handleAcceptInvite={props.handleAcceptInvite}
                     handleDeclineInvite={props.handleDeclineInvite}
+                    buttonStyle={buttonStyle}
                 />
 
             default:
@@ -106,7 +110,11 @@ function IdleUserListItem(props) {
             </select>
         </div>
         <div className="buttons">
-            <button onClick={handleInviteUser}>Invite</button>
+            <button
+            onClick={handleInviteUser}
+            style={props.buttonStyle}>
+                Invite
+            </button>
         </div>
     </>;
 
@@ -132,7 +140,11 @@ function AwaitUserListItem(props) {
             <span>Invite sent!</span>
         </div>
         <div className="buttons">
-            <button onClick={() => props.handleCancelInvite()}>Cancel</button>
+            <button
+            onClick={() => props.handleCancelInvite()}
+            style={props.buttonStyle}>
+                Cancel
+            </button>
         </div>
     </>;
 
@@ -158,8 +170,16 @@ function InvitedUserListItem(props) {
             <span>This user has invited you to a game with {props.numberCards} cards.</span>
         </div>
         <div className="buttons">
-            <button onClick={() => props.handleAcceptInvite()}>Accept</button>
-            <button onClick={() => props.handleDeclineInvite()}>Decline</button>
+            <button
+            onClick={() => props.handleAcceptInvite()}
+            style={props.buttonStyle}>
+                Accept
+            </button>
+            <button
+            onClick={() => props.handleDeclineInvite()}
+            style={props.buttonStyle}>
+                Decline
+            </button>
         </div>
     </>;
 

@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import MultiGame from './MultiGame';
 import Lobby from './Lobby';
 import { ServerContext } from './ServerContext';
@@ -6,26 +6,51 @@ import useGameServer from './customhooks/useGameServer';
 import useRandomizedDeck from './customhooks/useRandomizedDeck';
 import ScoreScreen from './ScoreScreen';
 import './stylesheets/multiplayer.css'
+import ErrorScreen from './ErrorScreen';
 
 function Multiplayer(props) {
-    const server = useGameServer();
-
-    // Possible states of multiplay: lobby, playing, showing-score
-    const [multiplayerState, setMultiplayerState] = useState("lobby");
-
-    // The currently active match. Format: { opponent: string, numberCards: int, firstMove: bool }
-    const [activeMatch, setActiveMatch] = useState(null);
-
-    // Custom hook offering functionality for randomizing a deck of cards.
+    const server = useGameServer("http://jats.web.eadania.dk/proxyhub", 10);
+    const [multiplayerState, setMultiplayerState] = useState("lobby"); // States: lobby, playing, showing-score, error
+    const [activeMatch, setActiveMatch] = useState(null); // Format: { opponent: string, numberCards: int, firstMove: bool }
     const { deck, setDeck, getNewDeck } = useRandomizedDeck(0);
+    const [endGameStats, setEndGameStats] = useState(null); // Format: { playerStats: { score, lives, timer }, opponentStats: { score, lives, timer } }
+    const [errorMessage, setErrorMessage] = useState("");
 
-    // Stats from both players at the end of a multiplayer game. { playerStats: { score, lives, timer }, opponentStats: { score, lives, timer } }
-    const [endGameStats, setEndGameStats] = useState(null);
-
+    // Called by MultiGame component when the game ends.
     const onGameEndCallback = useCallback((playerStats, opponentStats) => {
         setEndGameStats({ playerStats, opponentStats });
         setMultiplayerState("showing-score");
     }, []);
+
+    // Called by MuitGame when an error occurs.
+    const onError = useCallback(error => {
+        setErrorMessage(error);
+        setMultiplayerState("error");
+    }, []);
+
+    // Called by ErrorScreen when return button is pressed.
+    const onClickReturn = useCallback(() => {
+        setMultiplayerState("lobby");
+    }, []);
+
+    // Called by ScoreScreen when exit button is clicked.
+    const onClickExit = useCallback(() => {
+        setMultiplayerState("lobby");
+    }, []);
+
+    // Handle incoming invitations while not in lobby.
+    useEffect(() => {
+        if (multiplayerState === "lobby") return;
+        if (!server.eventMessage) return;
+
+        let event = server.eventMessage;
+
+        if (event.type === "Invite") {
+            server.sendMessage(event.sender, { type: "Abort", reason: "In Game" });
+            server.setEventMessage(null);
+        }
+
+    }, [multiplayerState, server]);
 
     return (
         <div className="multiplayer">
@@ -46,11 +71,17 @@ function Multiplayer(props) {
                     setDeck={setDeck}
                     firstMove={activeMatch.firstMove}
                     onGameEnd={onGameEndCallback}
-                    setMultiplayerState={setMultiplayerState}
+                    onError={onError}
                 />}
 
                 {multiplayerState === "showing-score" && <ScoreScreen 
                     endGameStats={endGameStats}
+                    onClickExit={onClickExit}
+                />}
+
+                {multiplayerState === "error" && <ErrorScreen 
+                    errorMessage={errorMessage}
+                    onClickReturn={onClickReturn}
                 />}
             </ServerContext.Provider>
         </div>

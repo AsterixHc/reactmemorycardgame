@@ -8,8 +8,10 @@ function ChatWindow(props) {
     const theme = useContext(ThemeContext);
     const server = useContext(ServerContext);
     const [messageInput, setMessageInput] = useState("");
-    const[opponentMessages, setOpponentMessages] = useState([]);
+    const [messages, setMessages] = useState([]);
+    const buttonStyle = { backgroundColor: theme.buttonColor, color: theme.buttonTextColor, textShadow: theme.textShadow };
 
+    // Sends a chat message to all users, if in lobby. Otherwise sends only to opponent.
     const sendMessage = useCallback(() => {
         if (messageInput === "") return;
 
@@ -22,32 +24,10 @@ function ChatWindow(props) {
             });
         }
 
-        server.setChatMessages(prevState => {
-            let newState = [...prevState];
-            newState.push("Me: " + messageInput);
-
-            if (newState.length > 10) {
-                newState.shift();
-            }
-
-            return newState;
-        });
+        server.pushLocalMessage("Player", messageInput);
 
         setMessageInput("");
     }, [messageInput, server, opponent]);
-
-    // TODO: Revamp chatMessages with sender and message.
-    useEffect(() => {
-        let temp = [];
-        server.chatMessages.forEach(message => {
-            if ( message.includes(opponent + " :") || message.includes("Me: ")) {
-                temp.push(message);
-            }
-        });
-
-        setOpponentMessages(temp);
-
-    }, [opponent, server.chatMessages]);
 
     const handleMsgInputChange = useCallback(event => {
         setMessageInput(event.target.value);
@@ -58,12 +38,43 @@ function ChatWindow(props) {
             sendMessage();
     }, [sendMessage]);
 
+    // Construct chat messages from chatMessage objects.
+    useEffect(() => {
+        let tempMessages = [];
+        if (!opponent) { // If in lobby, get all messages, including server messages.
+            server.chatMessages.forEach(chatMessage => {
+                if (chatMessage.sender === "Server") {
+                    tempMessages.push(chatMessage.message);
+                }
+                else if(chatMessage.sender === "Player") {
+                    tempMessages.push("Me: " + chatMessage.message);
+                }
+                else {
+                    tempMessages.push(chatMessage.sender + ": " + chatMessage.message);
+                }
+            });
+        }
+        else { // If in game, get player and opponent messages only.
+            server.chatMessages.forEach(chatMessage => {
+                if (chatMessage.sender === opponent) {
+                    tempMessages.push(chatMessage.sender + ": " + chatMessage.message);
+                }
+                else if (chatMessage.sender === "Player") {
+                    tempMessages.push("Me: " + chatMessage.message);
+                }
+            });
+        }
+
+        setMessages(tempMessages);
+
+    }, [opponent, server.chatMessages]);
+
     return (
         <div className="chat-window" style={{ backgroundColor: theme.backgroundBoxColor }}>
-            <textarea className="messages" readOnly={true} value={opponent ? opponentMessages.join("\n") : server.chatMessages.join("\n")} />
+            <textarea className="messages" readOnly={true} value={messages.join("\n")} />
             <div className="input">
                 <input onChange={handleMsgInputChange} onKeyDown={handleMsgInputKeyDown} value={messageInput}></input>
-                <button onClick={sendMessage}>Send</button>
+                <button style={buttonStyle} onClick={sendMessage}>Send</button>
             </div>
         </div>
     );

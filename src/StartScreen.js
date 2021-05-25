@@ -5,6 +5,7 @@ import './stylesheets/startscreen.css'
 function StartScreen(props) {
     const theme = useContext(ThemeContext);
     const [selectInput, setSelectInput] = useState(10);
+    const buttonStyle = {backgroundColor: theme.buttonColor, color: theme.buttonTextColor, textShadow: theme.textShadow};
 
     function handleChangeSelect(event) {
         setSelectInput(event.target.value);
@@ -21,9 +22,8 @@ function StartScreen(props) {
     }
 
     return (
-
         <div className="start-screen" style={{ backgroundColor: theme.backgroundBoxColor }}>
-            <button onClick={handleClickStart} style={{backgroundColor: theme.buttonColor, color: theme.buttonTextColor, textShadow: theme.textShadow}}>
+            <button onClick={handleClickStart} style={buttonStyle}>
                 Start Game!
                 </button>
             <div className="number-cards-select">
@@ -42,11 +42,10 @@ function StartScreen(props) {
                     <option>104</option>
                 </select>
             </div>
-            <button onClick={handleClickMultiplayer} style={{backgroundColor: theme.buttonColor, color: theme.buttonTextColor, textShadow: theme.textShadow}}>
+            <button onClick={handleClickMultiplayer} style={buttonStyle}>
                 MultiPlayer!
                 </button>
         </div>
-
     );
 }
 

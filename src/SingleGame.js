@@ -6,22 +6,11 @@ import Sidebar from "./Sidebar"
 import CardContainer from "./CardContainer"
 
 function SingleGame(props) {
-    // A deck of card pairs, size specified by props.
     const { deck, setDeck } = useRandomizedDeck(props.numberCards);
-
-    // The cards that player has chosen to flip.
     const [chosenCards, setChosenCards] = useState({ first: null, second: null });
-
-    // The current game state: init, await-card-1, await-card-2, process-choice, game-over
-    const [gameState, setGameState] = useState("init");
-
-    // The current score from matching cards.
+    const [gameState, setGameState] = useState("init"); // States: init, await-card-1, await-card-2, process-choice, game-over
     const [score, setScore] = useState(0);
-
-    // The number of remaining lives.
     const [lives, setLives] = useState(5);
-
-    // A coundown providing the remaining time.
     const { timer, setRunning: setTimerRunning } = useCountdown((5 * props.numberCards), false, () => { setGameState("game-over") });
 
     // Handle game state: init
@@ -66,11 +55,9 @@ function SingleGame(props) {
 
         let timeout = setTimeout(() => {
             if (first.sourceId === second.sourceId) { // Match.
-                // Hide matched cards.
                 first.hidden = true;
                 second.hidden = true;
 
-                // Award points for mathcing.
                 setScore(prevState => prevState + 100);
 
                 // Handle win condition.
@@ -80,11 +67,9 @@ function SingleGame(props) {
                 }
             }
             else { // No match.
-                // Flip cards back.
                 first.flipped = !first.flipped;
                 second.flipped = !second.flipped;
 
-                // Detract 1 life.
                 let prevLives;
                 setLives(prevState => {
                     prevLives = prevState;
@@ -113,7 +98,6 @@ function SingleGame(props) {
 
         setTimerRunning(false);
         props.onGameEnd({score, lives, timer});
-        props.setActiveScreen("score");
 
     }, [gameState, setTimerRunning, props, score, lives, timer]);
 
@@ -124,10 +108,8 @@ function SingleGame(props) {
 
         let card = deck.find(card => card.id === id);
 
-        // Flip card.
         card.flipped = !card.flipped;
 
-        // Set card as chosen, update game state.
         setChosenCards(prevState => {
             let newState = { ...prevState };
 
