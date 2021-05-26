@@ -1,4 +1,4 @@
-.timed-popup{
+.popup{
     display: flex;
     justify-content: center;
     align-items: center;
@@ -11,11 +11,11 @@
     background-color: rgba(0, 0, 0, 0.2);
 }
 
-.timed-popup.hide{
+.popup.hide{
     visibility: hidden;
 }
 
-.timed-popup .children{
+.popup .children{
     display: flex;
     justify-content: center;
 

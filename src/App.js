@@ -55,7 +55,6 @@ function App(props) {
     // Called by SingleGame component when the game ends.
     const onGameEndCallback = useCallback(playerStats => {
         setEndGameStats({playerStats});
-        setActiveScreen("score");
     }, []);
 
     // Called by ScoreScreen when exit button is clicked.
@@ -97,7 +96,7 @@ function App(props) {
             <ThemeContext.Provider value={activeTheme}>
                 <Navigation selectThemeCallback={selectThemeCallback} setActiveScreen={setActiveScreen} themes={themes}/>
                 {activeScreen === "start" && <StartScreen setActiveScreen={setActiveScreen} setNumberCards={setNumberCards} />}
-                {activeScreen === "single" && <SingleGame onGameEnd={onGameEndCallback} numberCards={numberCards} />}
+                {activeScreen === "single" && <SingleGame setActiveScreen={setActiveScreen} onGameEnd={onGameEndCallback} numberCards={numberCards} />}
                 {activeScreen === "multi" && <Multiplayer />}
                 {activeScreen === "score" && <ScoreScreen endGameStats={endGameStats} onClickExit={onClickExit}/>}
             </ThemeContext.Provider>

@@ -98,6 +98,7 @@ function SingleGame(props) {
 
         setTimerRunning(false);
         props.onGameEnd({score, lives, timer});
+        props.setActiveScreen("score");
 
     }, [gameState, setTimerRunning, props, score, lives, timer]);
 

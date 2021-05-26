@@ -28,13 +28,8 @@ function Multiplayer(props) {
         setMultiplayerState("error");
     }, []);
 
-    // Called by ErrorScreen when return button is pressed.
+    // Called when return button is pressed.
     const onClickReturn = useCallback(() => {
-        setMultiplayerState("lobby");
-    }, []);
-
-    // Called by ScoreScreen when exit button is clicked.
-    const onClickExit = useCallback(() => {
         setMultiplayerState("lobby");
     }, []);
 
@@ -76,7 +71,7 @@ function Multiplayer(props) {
 
                 {multiplayerState === "showing-score" && <ScoreScreen 
                     endGameStats={endGameStats}
-                    onClickExit={onClickExit}
+                    onClickExit={onClickReturn}
                 />}
 
                 {multiplayerState === "error" && <ErrorScreen 

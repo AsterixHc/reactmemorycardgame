@@ -3,7 +3,7 @@ import { ThemeContext } from './ThemeContext';
 import './stylesheets/navigation.css'
 
 function Navigation(props) {
-    const { selectThemeCallback, setActiveScreen, themes } = props;
+    const {selectThemeCallback, setActiveScreen, themes} = props;
     const theme = useContext(ThemeContext)
     const [themeSelect, setThemeSelect] = useState("default");
 
@@ -13,24 +13,26 @@ function Navigation(props) {
     }, [selectThemeCallback]);
 
     return (
-        <nav className="nav" style={{ backgroundColor: theme.menuColor }}>
-            <ul>
-                <li onClick={() => setActiveScreen("start")}>
-                    Home
+        <>
+            <nav className="nav" style={{ backgroundColor: theme.menuColor }}>
+                <ul>
+                    <li onClick={() => setActiveScreen("start")}>
+                        Home
                     </li>
-                <li className="theme-select">
-                    <label>Select a theme: </label>
-                    <select value={themeSelect} onChange={handleThemeSelectChange}>
-                        <option value="default">Default</option>
-                        <option value="vice">Miami Vice</option>
-                        {themes.online
-                            ? <option value="online">Pixel</option>
-                            : <option disabled={true} style={{ fontStyle: "italic" }}>Unavailable</option>
-                        }
-                    </select>
-                </li>
-            </ul>
-        </nav>
+                    <li className="theme-select">
+                        <label>Select a theme: </label>
+                        <select value={themeSelect} onChange={handleThemeSelectChange}>
+                            <option value="default">Default</option>
+                            <option value="vice">Miami Vice</option>
+                            {themes.online
+                                ? <option value="online">Pixel</option>
+                                : <option disabled={true} style={{ fontStyle: "italic" }}>Unavailable</option>
+                            }
+                        </select>
+                    </li>
+                </ul>
+            </nav>
+        </>
     );
 }
 

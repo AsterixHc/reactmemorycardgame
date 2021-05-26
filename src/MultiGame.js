@@ -4,7 +4,7 @@ import Sidebar from "./Sidebar"
 import CardContainer from "./CardContainer"
 import ChatWindow from "./ChatWindow"
 import { ServerContext } from "./ServerContext"
-import TimedPopup from "./TimedPopup"
+import Popup from "./Popup"
 
 function MultiGame(props) {
     const { opponent, numberCards, deck, setDeck, firstMove, onGameEnd, onError } = props;
@@ -40,7 +40,6 @@ function MultiGame(props) {
 
             timeout = setTimeout(() => {
                 flipAllCards();
-                setTimerRunning(firstMove);
                 setGameState(firstMove ? "await-card-1" : "opponent-turn");
                 clearTimeout(timeout);
             }, 1500);
@@ -48,7 +47,7 @@ function MultiGame(props) {
 
         return () => clearTimeout(timeout);
 
-    }, [gameState, setTimerRunning, firstMove, setDeck]);
+    }, [gameState, firstMove, setDeck]);
 
     // Handle game state: process-choice
     useEffect(() => {
@@ -89,14 +88,31 @@ function MultiGame(props) {
 
             setChosenCards({ first: null, second: null });
             server.sendMessage(opponent, { type: "EndTurn" });
-            setTimerRunning(false);
             setGameState("opponent-turn");
 
         }, 1000);
 
         return () => clearTimeout(timeout);
 
-    }, [gameState, chosenCards, deck, server, opponent, setTimerRunning]);
+    }, [gameState, chosenCards, deck, server, opponent]);
+
+    // Handle turn change, by alerting player and starting/stopping the timer appropriately.
+    useEffect(() => {
+        if (gameState !== "opponent-turn" && gameState !== "await-card-1") return;
+
+        setTimerRunning(false); 
+
+        setShowPopup(true);
+        let timeout = setTimeout(() => {
+            setShowPopup(false);
+
+            if (gameState === "await-card-1") {
+                setTimerRunning(true);
+            }
+        }, 1000);
+
+        return () => clearTimeout(timeout);
+    }, [gameState, setTimerRunning]);
 
     // Handle game state: opponent-turn
     useEffect(() => {
@@ -151,7 +167,6 @@ function MultiGame(props) {
                 break;
 
             case "EndTurn":
-                setTimerRunning(true);
                 setGameState("await-card-1");
                 server.setEventMessage(null);
                 break;
@@ -165,7 +180,7 @@ function MultiGame(props) {
             default:
                 break;
         }
-    }, [gameState, server, chosenCards, deck, setTimerRunning]);
+    }, [gameState, server, chosenCards, deck]);
 
     // Handle game state: game-over
     useEffect(() => {
@@ -244,12 +259,10 @@ function MultiGame(props) {
                     <ChatWindow opponent={opponent} />
                 </div>
             </div>
-            <TimedPopup
-                trigger={showPopup}
-                setTrigger={setShowPopup}
-                duration={2000}>
-                {gameState === "opponent-turn" ? "Your turn" : "Opponent's turn"}
-            </TimedPopup>
+            <Popup trigger={showPopup}>
+                {gameState === "await-card-1" && <h2>Your turn</h2>}
+                {gameState === "opponent-turn" && <h2>Opponent's turn</h2>}
+            </Popup>
         </>
     )
 }

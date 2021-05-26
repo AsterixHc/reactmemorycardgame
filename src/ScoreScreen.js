@@ -98,25 +98,18 @@ function MultiplayerVerdict(props) {
             let newState = prevState;
 
             if (opponentStats.timer === 0 || opponentStats.lives === 0) {
-                console.log("opponentStats.timer === 0 || opponentStats.lives === 0");
                 newState = "You";
             }
             else if (playerStats.timer === 0 || playerStats.lives === 0) {
-                console.log("playerStats.timer === 0 || playerStats.lives === 0");
                 newState = "Opponent";
             }
             else if (playerTotal > opponentTotal) {
-                console.log("playerStats.score > opponentStats.score");
                 newState = "You";
             }
             else if (playerTotal < opponentTotal) {
-                console.log("playerStats.score < opponentStats.score");
                 newState = "Opponent";
             }
             else if (playerTotal === opponentTotal) {
-                console.log("playerStats.score === opponentStats.score");
-                console.log(playerStats.score);
-                console.log(opponentStats.score);
                 newState = "Nobody";
             }
 
